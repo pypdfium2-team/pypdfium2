@@ -80,7 +80,7 @@ jobs:
         uses: ChristopheLav/windows-sdk-install@aceebd61475568479ce68465d0849f5de9a0bfe9 # v1.0.5
         with:
           version-sdk: 28000
-          features: 'OptionId.WindowsDesktopDebuggers'
+          features: OptionId.WindowsDesktopDebuggers,OptionId.DesktopCPP${{ case(inputs.cibw_arch == 'amd64', 'x64', inputs.cibw_arch) }}
       
       # Reminder: most configuration is in pyproject.toml so we can use TOML overrides
       - name: Build wheels
@@ -111,7 +111,7 @@ jobs:
       # - Suppress known test suite failures on s390x and musllinux_armv7l
       - name: Post-test
         if: ${{ contains(inputs.cibw_target, 'linux') }}
-        continue-on-error: ${{ inputs.cibw_arch == 's390x' || inputs.cibw_target == 'musllinux_armv7l' }}
+        continue-on-error: ${{ inputs.cibw_arch == 's390x' || inputs.cibw_arch == 'armv7l' }}
         run: python3 utils/container_driver.py -a wheelhouse/*.whl -t "$TARGET"
         env:
           TARGET: ${{ inputs.cibw_target }}
