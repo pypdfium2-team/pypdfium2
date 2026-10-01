@@ -67,7 +67,8 @@ test-command = [
 ]
 
 [tool.cibuildwheel.linux]
-manylinux-armv7l-image = "ghcr.io/mayeut/manylinux_2_35:latest"
+# Ubuntu-based manylinux_2_35 is unfit for C++23. Specifically, the GN build dependency fails to compile on manylinux_2_35. Hence use the next candidate which is 2_39.
+manylinux-armv7l-image = "ghcr.io/mayeut/manylinux_2_39:latest"
 
 [tool.cibuildwheel.linux.environment]
 PDFIUM_PLATFORM = "sourcebuild-native"
