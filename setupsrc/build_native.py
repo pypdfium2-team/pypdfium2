@@ -214,15 +214,10 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
     do_patches = df.fetch("pdfium", PDFIUM_DIR, reset=reset)
     if do_patches:
         shared_autopatches(PDFIUM_DIR, nonstatic=(not is_pyodide))
+        bin_autopatch(PDFIUM_DIR)
         autopatch(
             PDFIUM_DIR/"testing"/"BUILD.gn",
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
-            is_regex=True, exp_count=1,
-        )
-        # pdfium > 8015, https://pdfium.googlesource.com/pdfium/+/2ca2e91deab056540c3e05049b4a6029c262ec90
-        autopatch(
-            PDFIUM_DIR/".gn",
-            r'(script_executable) = "(.+)"', rf'\1 = "{sys.executable}"',
             is_regex=True, exp_count=1,
         )
         if sys.byteorder == "big":

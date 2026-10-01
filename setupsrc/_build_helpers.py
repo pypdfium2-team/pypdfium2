@@ -84,6 +84,14 @@ def shared_autopatches(pdfium_dir, nonstatic=True):
             is_regex=False, exp_count=1,
         )
 
+def bin_autopatch(PDFIUM_DIR):
+    # pdfium > 8015, https://pdfium.googlesource.com/pdfium/+/2ca2e91deab056540c3e05049b4a6029c262ec90
+    autopatch(
+        PDFIUM_DIR/".gn",
+        r'(script_executable) = "(.+)"', rf'\1 = "{sys.executable}"',
+        is_regex=True, exp_count=1,
+    )
+
 
 def _to_gn(value):
     if isinstance(value, bool):

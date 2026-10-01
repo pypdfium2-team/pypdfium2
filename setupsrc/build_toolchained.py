@@ -110,6 +110,8 @@ def patch_pdfium(build_ver, target_cpu, target_os, patch_clang, prefer_gcc):
     # TODO in the future, we might want to extract separate DLLs for the imaging libraries (e.g. libjpeg, libpng)
     
     shared_autopatches(PDFiumDir)
+    if PORTABLE_MODE:
+        bin_autopatch(PDFiumDir)
     
     if sys.platform.startswith("win32"):
         git_apply_patch(PatchDir/"win"/"use_resources_rc.patch", PDFiumDir)
