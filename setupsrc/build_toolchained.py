@@ -194,7 +194,7 @@ def handle_windows(win_sdk_dir):
     if win_sdk_dir is None:
         # Current GH Actions windows-latest
         sdk_cpu = "arm64" if Host._raw_machine == "arm64" else "x64"
-        win_sdk_dir = Path(fR"C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\{sdk_cpu}")
+        win_sdk_dir = Path(fR"C:\Program Files (x86)\Windows Kits\10\bin\10.0.28000.0\{sdk_cpu}")
     assert win_sdk_dir.exists()
     env_append("PATH", str(win_sdk_dir), os.pathsep)  # ... prepend?
     os.environ["DEPOT_TOOLS_WIN_TOOLCHAIN"] = "0"

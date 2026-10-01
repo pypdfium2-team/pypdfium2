@@ -26,7 +26,7 @@ from stl import cached_property
 # Commit the new version to the main branch only when all is green. Better stay on an older version for a while than break a target.
 # Updating and testing the patch sets can be a lot of work, so we might not want to do this too frequrently.
 SBUILD_NATIVE_PIN = 8076
-SBUILD_TOOLCHAINED_PIN = 8076  # TODO fix windows
+SBUILD_TOOLCHAINED_PIN = 8076
 
 PlatSpec_EnvVar = "PDFIUM_PLATFORM"
 PlatSpec_VerSep = ":"

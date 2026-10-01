@@ -74,11 +74,12 @@ jobs:
         if: ${{ contains(inputs.cibw_target, 'linux') && !(inputs.cibw_arch == 'x86_64' || inputs.cibw_arch == 'aarch64') }}
         uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4.3.0
       
+      # See the explanation in sbuild_one.yaml for why we need this.
       - name: Install Windows cross deps
-        if: ${{ startsWith(inputs.runner_os, 'windows') && inputs.cibw_arch != 'AMD64' }}
+        if: ${{ startsWith(inputs.runner_os, 'windows') }}
         uses: ChristopheLav/windows-sdk-install@aceebd61475568479ce68465d0849f5de9a0bfe9 # v1.0.5
         with:
-          version-sdk: 26100
+          version-sdk: 28000
           features: 'OptionId.WindowsDesktopDebuggers'
       
       # Reminder: most configuration is in pyproject.toml so we can use TOML overrides
