@@ -7,6 +7,7 @@
 version: 2
 updates:
   - package-ecosystem: "github-actions"
+    # FIXME dependabot misses our composite actions at .github/actions/
     directory: "/"
     schedule:
       interval: "quarterly"
