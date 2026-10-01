@@ -1,8 +1,8 @@
 diff --git a/core/fxcrt/BUILD.gn b/core/fxcrt/BUILD.gn
-index c93c8fa..48bee35 100644
+index f80726b..778e4a4 100644
 --- a/core/fxcrt/BUILD.gn
 +++ b/core/fxcrt/BUILD.gn
-@@ -161,7 +161,7 @@ source_set("fxcrt") {
+@@ -171,7 +171,7 @@ source_set("fxcrt") {
    } else {
      sources += [ "fx_memory_malloc.cpp" ]
    }
@@ -12,10 +12,10 @@ index c93c8fa..48bee35 100644
        "cfx_fileaccess_posix.cpp",
        "cfx_fileaccess_posix.h",
 diff --git a/core/fxge/BUILD.gn b/core/fxge/BUILD.gn
-index 25d2b53..846ed8a 100644
+index 4743d22..51dc615 100644
 --- a/core/fxge/BUILD.gn
 +++ b/core/fxge/BUILD.gn
-@@ -173,7 +173,7 @@ source_set("fxge") {
+@@ -171,7 +171,7 @@ source_set("fxge") {
      ]
    }
  
@@ -25,18 +25,18 @@ index 25d2b53..846ed8a 100644
    }
  
 diff --git a/core/fxge/cfx_face.cpp b/core/fxge/cfx_face.cpp
-index 8b57225..03f07f6 100644
+index a2895d7..2dd0db3 100644
 --- a/core/fxge/cfx_face.cpp
 +++ b/core/fxge/cfx_face.cpp
-@@ -796,10 +796,7 @@ std::unique_ptr<CFX_GlyphBitmap> CFX_Face::RenderGlyph(
-   }
+@@ -1142,10 +1142,7 @@ std::unique_ptr<CFX_GlyphBitmap> CFX_Face::RenderGlyph(
  
-   ScopedFaceTransform scoped_transform(GetRec(), &ft_matrix);
--  int load_flags = FT_LOAD_NO_BITMAP | FT_LOAD_PEDANTIC;
--  if (!IsTtOt()) {
--    load_flags |= FT_LOAD_NO_HINTING;
--  }
-+  int load_flags = FT_LOAD_NO_BITMAP | FT_LOAD_PEDANTIC | FT_LOAD_NO_HINTING;
-   FT_FaceRec* rec = GetRec();
-   int error = FT_Load_Glyph(rec, glyph_index, load_flags);
-   if (error) {
+   if (!loaded_fontations_outline) {
+     ScopedFaceTransform scoped_transform(GetRec(), &ft_matrix);
+-    int load_flags = FT_LOAD_NO_BITMAP | FT_LOAD_PEDANTIC;
+-    if (!IsTtOt()) {
+-      load_flags |= FT_LOAD_NO_HINTING;
+-    }
++    int load_flags = FT_LOAD_NO_BITMAP | FT_LOAD_PEDANTIC | FT_LOAD_NO_HINTING;
+     int error = FT_Load_Glyph(rec, glyph_index, load_flags);
+     if (error) {
+       if (load_flags & FT_LOAD_NO_HINTING) {

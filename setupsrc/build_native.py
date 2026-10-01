@@ -40,16 +40,12 @@ DEPS_URLS = dict(
     # unittests
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
     test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts",
-    # opt-in dependencies
-    partition_allocator = _CR_PREFIX + "chromium/src/base/allocator/partition_allocator",
-    #catapult = _CR_PREFIX + "catapult",  # android
 )
 SOURCES_DIR = ProjectDir / "sbuild" / "native"
 PDFIUM_DIR = SOURCES_DIR / "pdfium"
 PDFIUM_DIR_build = PDFIUM_DIR / "build"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 CUSTOM_TOOLCHAIN_DIR = PDFIUM_DIR_build/"toolchain"/"linux"/"custom"
-USE_PA = bool(int( os.environ.get("USE_PARTITION_ALLOC", "0") ))
 
 DefaultConfig = {
     "is_debug": False,
@@ -144,10 +140,6 @@ class _DeferredDeps:
 def handle_deps(config, vendor_deps, with_tests):
     
     deps_fields = ["build", "abseil", "fast_float", "simdutf", "dragonbox"]
-    if USE_PA:
-        deps_fields.append("partition_allocator")
-    # if IS_ANDROID:
-    #     deps_fields.append("catapult")
     
     if "libc++" in vendor_deps:
         deps_fields += ("buildtools", "libcxx", "libcxxabi", "llvm_libc")
@@ -227,13 +219,12 @@ def get_sources(deps_info, short_ver, with_tests, compiler, clang_ver, clang_pat
             r'(\s*)("//third_party/test_fonts")', r"\1# \2",
             is_regex=True, exp_count=1,
         )
-        if full_ver.build > 8015:
-            # https://pdfium.googlesource.com/pdfium/+/2ca2e91deab056540c3e05049b4a6029c262ec90
-            autopatch(
-                PDFIUM_DIR/".gn",
-                r'(script_executable) = "(.+)"', rf'\1 = "{sys.executable}"',
-                is_regex=True, exp_count=1,
-            )
+        # pdfium > 8015, https://pdfium.googlesource.com/pdfium/+/2ca2e91deab056540c3e05049b4a6029c262ec90
+        autopatch(
+            PDFIUM_DIR/".gn",
+            r'(script_executable) = "(.+)"', rf'\1 = "{sys.executable}"',
+            is_regex=True, exp_count=1,
+        )
         if sys.byteorder == "big":
             git_apply_patch(PatchDir/"bigendian.patch", cwd=PDFIUM_DIR)
         if is_pyodide:
@@ -258,9 +249,6 @@ checkout_libpng = true\
         # > Extra flags to be appended when compiling both C and C++ files. "CPP" stands for "C PreProcessor" in this context, although it can be used for non-preprocessor flags as well. Not to be confused with "CXX" (which follows).
         env_append("CPPFLAGS", "-ffp-contract=off", " ")
     if do_patches:
-        if full_ver.build <= 7928:
-            # it says gcc_toolchain but actually needed for clang as well
-            git_apply_patch(PatchDir/"gcc_toolchain.patch", cwd=PDFIUM_DIR_build)
         if is_pyodide:
             git_apply_patch(PatchDir/"wasm"/"build.patch", cwd=PDFIUM_DIR_build)
             wasm_config_dir = PDFIUM_DIR_build/"config"/"wasm"
@@ -304,10 +292,6 @@ checkout_libpng = true\
     df.fetch("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     df.fetch("simdutf", PDFIUM_3RDPARTY/"simdutf")
     df.fetch("dragonbox", PDFIUM_3RDPARTY/"dragonbox"/"src")
-    if USE_PA:
-        df.fetch("partition_allocator", PDFIUM_DIR/"base"/"allocator"/"partition_allocator")
-    # if IS_ANDROID:
-    #     df.fetch("catapult", PDFIUM_3RDPARTY/"catapult")
     
     if "libc++" in vendor_deps:
         df.fetch("buildtools", PDFIUM_DIR/"buildtools")
@@ -360,8 +344,6 @@ def configure(config, compiler, clang_ver, clang_path, is_pyodide):
     else:
         assert False, f"Unhandled compiler {compiler}"
     
-    if USE_PA:
-        config["pdf_use_partition_alloc"] = True
     if is_pyodide:
         pyodide_utils.configure(config, compiler)
 

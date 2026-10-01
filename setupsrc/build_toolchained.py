@@ -133,8 +133,6 @@ def patch_pdfium(build_ver, target_cpu, target_os, patch_clang, prefer_gcc):
             git_apply_patch(PatchDir/"no_libclang_rt.patch", PDFiumDir_build)
         if PORTABLE_MODE and patch_clang:
             git_apply_patch(PatchDir/"clang_22_compat.patch", PDFiumDir_build)
-        if PORTABLE_MODE or prefer_gcc:
-            git_apply_patch(PatchDir/"gcc_toolchain.patch", PDFiumDir_build)
 
 
 def _get_tool(name):

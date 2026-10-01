@@ -25,8 +25,8 @@ from stl import cached_property
 # Then, make a branch and run "Sourcebuild", "Sourcebuild Native" and "CIBW" on CI to see if all targets continue to work.
 # Commit the new version to the main branch only when all is green. Better stay on an older version for a while than break a target.
 # Updating and testing the patch sets can be a lot of work, so we might not want to do this too frequrently.
-SBUILD_NATIVE_PIN = 7913
-SBUILD_TOOLCHAINED_PIN = 7913
+SBUILD_NATIVE_PIN = 8076
+SBUILD_TOOLCHAINED_PIN = 8076  # TODO fix windows
 
 PlatSpec_EnvVar = "PDFIUM_PLATFORM"
 PlatSpec_VerSep = ":"
@@ -639,6 +639,7 @@ def _apply_refbindings(target_path, version):
     record_ver = PdfiumVer.pinned
     if version != record_ver:
         log(f"Warning: binary/bindings version mismatch ({version} != {record_ver}). This is ABI-unsafe!")
+    # TODO check if we need mkdir(target_path.parent) here
     shutil.copyfile(RefBindingsFile, target_path)
 
 
