@@ -15,9 +15,10 @@
 - Added bindings to some new PDFium APIs, along with CLI integration:
   * `PdfAttachment`: `.{get,set}_desc()` to read/write attachment descriptions, and `.get_subtype()` to obtain the MIME type.
   * `PdfBookmark.get_style()` and `PdfBookmarkStyle`.
-  * _Note: On platforms where we pin the PDFium version, the underlying PDFium APIs are not available yet, but they will be once the build scripts are updated to a new base._
 
-*Platforms*
+*Builds*
+- Updated build scripts and workflows PDFium pin from `7913` to `8076`.
+  Updated `gn-dist` from `2407.3` to `2540.0` (the `2501` build passed unused by pypdfium2).
 - Pyodide: Patch freetype load flags to avoid `FT_Load_Glyph()` somehow corrupting the heap. It seems that this addresses the previously encountered crashes/freezes; however, the exact cause remains elusive. Anyway, many thanks to Hood Chatham for this finding.
   * Dropped debug symbols. Enabled PyPI upload. Updated documentation.
 
