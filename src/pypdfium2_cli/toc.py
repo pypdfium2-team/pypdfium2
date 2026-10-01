@@ -7,7 +7,6 @@ from pypdfium2_cli._parsers import (
     get_input, round_list,
 )
 from pypdfium2_cfg.stl import BooleanOptionalAction
-from pypdfium2 import PDFIUM_INFO, PdfBookmark
 
 
 def attach(parser):
@@ -42,13 +41,6 @@ class ColorIndicator:
         return ""
 
 
-if PDFIUM_INFO.build > 8031:
-    get_style = PdfBookmark.get_style
-else:
-    def get_style(bm):
-        return None
-
-
 def main(args):
     
     pdf = get_input(args)
@@ -60,13 +52,13 @@ def main(args):
     for bm in pdf.get_toc(max_depth=args.max_depth):
         
         title = bm.get_title()
-        style = get_style(bm)
-        # TODO apply style to title via ANSI escape sequence
+        style = bm.get_style()
         color = bm.get_color()
         count = bm.get_count()
         count_str = f"{count:+}" if count != 0 else "*"
         out = "    " * bm.level
         # unconditionally add "->" regardless of whether a dest follows or not, to avoid ambiguity with titles potentially containing the same
+        # TODO apply style to title via ANSI escape sequence
         out += "[%s] %s -> " % (count_str, title)
         
         dest = bm.get_dest()
