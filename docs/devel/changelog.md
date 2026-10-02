@@ -5,6 +5,12 @@
 
 # Changelog
 
+## 5.14.0b1 (2026-10-02)
+
+- Updated pdfium-binaries from `7999` to `8076`. Additional builds may use various other versions of pdfium.
+- See the beta release notes on GitHub [here](https://github.com/pypdfium2-team/pypdfium2/releases/tag/5.14.0b1)
+
+
 ## 5.13.0 (2026-08-13)
 
 - Updated pdfium-binaries from `7947` to `7999`. Additional builds may use various other versions of pdfium.

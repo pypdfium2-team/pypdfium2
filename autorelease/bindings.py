@@ -382,7 +382,7 @@ FPDF_FONTBACKENDTYPE_FONTATIONS = 1
 FPDF_FONT_BACKEND_TYPE = enum_anon_4
 
 class struct_FPDF_LIBRARY_CONFIG_ (Structure):
-    __slots__ = ('version', 'm_pUserFontPaths', 'm_pIsolate', 'm_v8EmbedderSlot', 'm_pPlatform', 'm_RendererType', 'm_FontLibraryType', 'm_BrotliEnabled')
+    __slots__ = ('version', 'm_pUserFontPaths', 'm_pIsolate', 'm_v8EmbedderSlot', 'm_pPlatform', 'm_RendererType', 'm_FontLibraryType', 'm_BrotliEnabled', 'm_IsolatePerDocument')
 
 struct_FPDF_LIBRARY_CONFIG_._fields_ = (
     ('version', c_int),
@@ -393,6 +393,7 @@ struct_FPDF_LIBRARY_CONFIG_._fields_ = (
     ('m_RendererType', FPDF_RENDERER_TYPE),
     ('m_FontLibraryType', FPDF_FONT_BACKEND_TYPE),
     ('m_BrotliEnabled', FPDF_BOOL),
+    ('m_IsolatePerDocument', FPDF_BOOL),
 )
 
 FPDF_LIBRARY_CONFIG = struct_FPDF_LIBRARY_CONFIG_
@@ -1457,6 +1458,11 @@ if hasattr(_libs['pdfium'], 'FPDFAttachment_GetSubtype'):
     FPDFAttachment_GetSubtype.argtypes = (FPDF_ATTACHMENT, POINTER(FPDF_WCHAR), c_ulong)
     FPDFAttachment_GetSubtype.restype = c_ulong
 
+if hasattr(_libs['pdfium'], 'FPDFAttachment_GetAFRelationship'):
+    FPDFAttachment_GetAFRelationship = _libs['pdfium']['FPDFAttachment_GetAFRelationship']
+    FPDFAttachment_GetAFRelationship.argtypes = (FPDF_ATTACHMENT, POINTER(FPDF_WCHAR), c_ulong)
+    FPDFAttachment_GetAFRelationship.restype = c_ulong
+
 if hasattr(_libs['pdfium'], 'FPDFCatalog_IsTagged'):
     FPDFCatalog_IsTagged = _libs['pdfium']['FPDFCatalog_IsTagged']
     FPDFCatalog_IsTagged.argtypes = (FPDF_DOCUMENT, )
@@ -1579,6 +1585,11 @@ if hasattr(_libs['pdfium'], 'FPDFBookmark_GetColor'):
     FPDFBookmark_GetColor = _libs['pdfium']['FPDFBookmark_GetColor']
     FPDFBookmark_GetColor.argtypes = (FPDF_BOOKMARK, POINTER(c_float), POINTER(c_float), POINTER(c_float))
     FPDFBookmark_GetColor.restype = FPDF_BOOL
+
+if hasattr(_libs['pdfium'], 'FPDFBookmark_GetStyle'):
+    FPDFBookmark_GetStyle = _libs['pdfium']['FPDFBookmark_GetStyle']
+    FPDFBookmark_GetStyle.argtypes = (FPDF_BOOKMARK, )
+    FPDFBookmark_GetStyle.restype = c_int
 
 if hasattr(_libs['pdfium'], 'FPDFAction_GetType'):
     FPDFAction_GetType = _libs['pdfium']['FPDFAction_GetType']
@@ -2089,6 +2100,16 @@ if hasattr(_libs['pdfium'], 'FPDFPageObj_SetDashArray'):
     FPDFPageObj_SetDashArray.argtypes = (FPDF_PAGEOBJECT, POINTER(c_float), c_size_t, c_float)
     FPDFPageObj_SetDashArray.restype = FPDF_BOOL
 
+if hasattr(_libs['pdfium'], 'FPDFPageObj_GetRenderedStrokePattern'):
+    FPDFPageObj_GetRenderedStrokePattern = _libs['pdfium']['FPDFPageObj_GetRenderedStrokePattern']
+    FPDFPageObj_GetRenderedStrokePattern.argtypes = (FPDF_DOCUMENT, FPDF_PAGEOBJECT)
+    FPDFPageObj_GetRenderedStrokePattern.restype = FPDF_BITMAP
+
+if hasattr(_libs['pdfium'], 'FPDFPageObj_GetRenderedFillPattern'):
+    FPDFPageObj_GetRenderedFillPattern = _libs['pdfium']['FPDFPageObj_GetRenderedFillPattern']
+    FPDFPageObj_GetRenderedFillPattern.argtypes = (FPDF_DOCUMENT, FPDF_PAGEOBJECT)
+    FPDFPageObj_GetRenderedFillPattern.restype = FPDF_BITMAP
+
 if hasattr(_libs['pdfium'], 'FPDFPath_CountSegments'):
     FPDFPath_CountSegments = _libs['pdfium']['FPDFPath_CountSegments']
     FPDFPath_CountSegments.argtypes = (FPDF_PAGEOBJECT, )
@@ -2128,6 +2149,11 @@ if hasattr(_libs['pdfium'], 'FPDFPath_BezierTo'):
     FPDFPath_BezierTo = _libs['pdfium']['FPDFPath_BezierTo']
     FPDFPath_BezierTo.argtypes = (FPDF_PAGEOBJECT, c_float, c_float, c_float, c_float, c_float, c_float)
     FPDFPath_BezierTo.restype = FPDF_BOOL
+
+if hasattr(_libs['pdfium'], 'FPDFPath_GetBezierControlPoints'):
+    FPDFPath_GetBezierControlPoints = _libs['pdfium']['FPDFPath_GetBezierControlPoints']
+    FPDFPath_GetBezierControlPoints.argtypes = (FPDF_PAGEOBJECT, c_size_t, POINTER(FS_POINTF), POINTER(FS_POINTF))
+    FPDFPath_GetBezierControlPoints.restype = FPDF_BOOL
 
 if hasattr(_libs['pdfium'], 'FPDFPath_Close'):
     FPDFPath_Close = _libs['pdfium']['FPDFPath_Close']
