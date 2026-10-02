@@ -121,6 +121,7 @@ jobs:
         run: python3 -m build -wxn
         env:
           PDFIUM_PLATFORM: sourcebuild
+          # TODO use auto-tagging for macOS
           CROSS_TAG: ${{ inputs.wheel_tag }}  # optional
       
       - name: Upload wheel as artifact
