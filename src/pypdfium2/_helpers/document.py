@@ -287,13 +287,15 @@ class PdfDocument (pdfium_i.AutoCloseable):
                 If the file was updated incrementally, the permanent identifier stays the same,
                 while the changing identifier is re-calculated.
         Returns:
-            bytes: Unique file identifier from the PDF's trailer dictionary.
-            See PDF 1.7, Section 14.4 "File Identifiers".
+            bytes: Unique file identifier from the PDF's trailer dictionary, or an empty bytestring if it could not be determined. See PDF 1.7, Section 14.4 "File Identifiers".
         """
         n_bytes = pdfium_c.FPDF_GetFileIdentifier(self, type, None, 0)
-        buffer = ctypes.create_string_buffer(n_bytes)
+        if not n_bytes:
+            return b""
+        buffer = (ctypes.c_char * n_bytes)()
         pdfium_c.FPDF_GetFileIdentifier(self, type, buffer, n_bytes)
-        return buffer[:n_bytes-2]
+        # TODO(apibreak) change return type to avoid copy
+        return memoryview(buffer)[:n_bytes-1].tobytes()
     
     
     def get_version(self):

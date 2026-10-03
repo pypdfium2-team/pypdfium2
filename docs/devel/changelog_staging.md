@@ -6,6 +6,7 @@
 # Changelog for next release
 
 *Runtime*
+- `PdfDocument.get_identifier()`: Fix a blunder that caused one byte too much to be chopped off.
 - `PdfDocument` and `PdfImage.load_jpeg()`: With byte stream input, in the `_buffer_reader` callback, check that the number of bytes read into the buffer is no less than the buffer's size, otherwise indicate error.
   `@Stjorn` filed a security ticket that triggered this change; however we consider this more of a theoretical safety *enhancement* and not actually a vulnerability, since under valid cirucmstances we do not envisage a situation where `readinto()` would fall short on data. It's clear enough that it is invalid to modify a file while bound by an object handle, and an attacker being able to do that would imply an already heavily compromised system. [No exploit from the heavens.](https://vulnbrocards.com/brocards/vb002-no-exploit-from-heavens/) Updated documentation.
   (With older versions of pypdfium2, consider wrapping buffer input so that `readinto()` raises an exception if it could not consume enough data to fill the buffer.)
