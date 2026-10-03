@@ -574,8 +574,7 @@ class PdfImage (PdfObject):
             raise ValueError(f"Cannot extract to '{dest}'")
 
 
-_ImageInfo = namedtuple("_ImageInfo", "format mode metadata all_filters complex_filters")
-
+_ImageInfo = namedtuple("_ImageInfo", ("format", "mode", "metadata"))
 
 class _ImageExtractionError (Exception):
     pass
@@ -631,18 +630,18 @@ def _extract_smart(image_obj, fb_format=None):
 def _extract_direct(image_obj):
     
     all_filters = image_obj.get_filters()
-    complex_filters = [f for f in all_filters if f not in PdfImage.SIMPLE_FILTERS]
+    complex_filters = tuple(f for f in all_filters if f not in PdfImage.SIMPLE_FILTERS)
     metadata = image_obj.get_metadata()
     mode = _get_pil_mode(metadata.colorspace, metadata.bits_per_pixel)
     
-    if len(complex_filters) == 0:
+    if not complex_filters:
         if mode:
             out_data = image_obj.get_data(decode_simple=True)
             out_format = "raw"
         else:
             raise _ImageExtractionError(f"Unhandled color space {pdfium_i.ColorspaceToStr.get(metadata.colorspace)} - don't know how to treat data.")
     elif len(complex_filters) == 1:
-        f = complex_filters[0]
+        f, = complex_filters
         if f == "DCTDecode":
             out_data = image_obj.get_data(decode_simple=True)
             out_format = "jpg"
@@ -654,5 +653,4 @@ def _extract_direct(image_obj):
     else:
         raise _ImageExtractionError(f"Cannot handle multiple complex filters {complex_filters}.")
     
-    info = _ImageInfo(out_format, mode, metadata, all_filters, complex_filters)
-    return out_data, info
+    return out_data, _ImageInfo(out_format, mode, metadata)
