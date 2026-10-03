@@ -36,6 +36,8 @@ class PdfAttachment (pdfium_i.AutoCastable):
             str: Name of the attachment.
         """
         n_bytes = pdfium_c.FPDFAttachment_GetName(self, None, 0)
+        if not n_bytes:
+            raise PdfiumError("Failed to get attachment name.")
         n_units = -(n_bytes // -FPDF_WCHAR_size)  # ceildiv
         buffer = (pdfium_c.FPDF_WCHAR * n_units)()
         pdfium_c.FPDFAttachment_GetName(self, buffer, n_bytes)
@@ -50,10 +52,10 @@ class PdfAttachment (pdfium_i.AutoCastable):
         n_bytes = ctypes.c_ulong()
         pdfium_c.FPDFAttachment_GetFile(self, None, 0, n_bytes)
         n_bytes = n_bytes.value
-        if n_bytes == 0:
-            raise PdfiumError(f"Failed to extract attachment (buffer length {n_bytes}).")
+        if not n_bytes:
+            raise PdfiumError(f"Failed to extract attachment (no data).")
         
-        buffer = ctypes.create_string_buffer(n_bytes)
+        buffer = (ctypes.c_char * n_bytes)()
         out_buflen = ctypes.c_ulong()
         ok = pdfium_c.FPDFAttachment_GetFile(self, buffer, n_bytes, out_buflen)
         out_buflen = out_buflen.value

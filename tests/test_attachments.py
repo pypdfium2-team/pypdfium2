@@ -80,7 +80,7 @@ def test_attachment():
     atm_c = pdf.new_attachment(name_c)
     assert pdf.count_attachments() == 3
     assert atm_c.get_name() == name_c
-    with pytest.raises(pdfium.PdfiumError, match=re.escape("Failed to extract attachment (buffer length 0).")):
+    with pytest.raises(pdfium.PdfiumError, match=re.escape("Failed to extract attachment (no data).")):
         atm_c.get_data()
     data_c = TestFiles.mona_lisa.read_bytes()
     atm_c.set_data(data_c)
