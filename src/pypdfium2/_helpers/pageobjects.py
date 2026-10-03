@@ -190,7 +190,7 @@ class PdfTextObj (PdfObject):
             raise RuntimeError("PdfTextObj.extract() requires textpage to be set.")
         
         n_bytes = pdfium_c.FPDFTextObj_GetText(self, self.textpage, None, 0)
-        if n_bytes == 0:
+        if not n_bytes:
             raise PdfiumError("Failed to get text from textobject.")
         
         n_units = -(n_bytes // -FPDF_WCHAR_size)  # ceildiv
@@ -242,10 +242,10 @@ class PdfFont (pdfium_i.AutoCloseable):
             raise PdfiumError("Failed to determine font embedding status.")
         return rc == 1
     
-    def _get_name_impl(self, api, which, errors):
+    def _get_name(self, api, which, errors):
         
         bufsize = api(self, None, 0)
-        if bufsize == 0:
+        if not bufsize:
             raise PdfiumError(f"Failed to get font {which} name.")
         
         buffer = ctypes.create_string_buffer(bufsize)
@@ -258,14 +258,14 @@ class PdfFont (pdfium_i.AutoCloseable):
         Returns:
             str: The base font name.
         """
-        return self._get_name_impl(pdfium_c.FPDFFont_GetBaseFontName, "base", errors)
+        return self._get_name(pdfium_c.FPDFFont_GetBaseFontName, "base", errors)
     
     def get_family_name(self, errors="replace"):
         """
         Returns:
             str: The font family name.
         """
-        return self._get_name_impl(pdfium_c.FPDFFont_GetFamilyName, "family", errors)
+        return self._get_name(pdfium_c.FPDFFont_GetFamilyName, "family", errors)
     
     def get_weight(self):
         """

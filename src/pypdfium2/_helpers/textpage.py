@@ -129,7 +129,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
         # https://github.com/pypdfium2-team/pypdfium2/issues/261
         # https://crbug.com/pdfium/2079
         active_range = self._get_active_text_range(index, index+count-1)
-        if active_range == 0:
+        if not active_range:
             return ""
         
         # NOTE since we have converted indices from char to text, they will shift accordingly for inserted/excluded chars, so this will calculate the exact output count
@@ -274,7 +274,7 @@ class PdfTextPage (pdfium_i.AutoCloseable):
             PdfTextSearcher: A helper object to search text.
         """
         
-        if len(text) == 0:
+        if not text:
             raise ValueError("Text length must be greater than 0.")
         
         if match_case:
