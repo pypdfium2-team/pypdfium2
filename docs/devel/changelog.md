@@ -7,7 +7,6 @@
 
 ## 5.14.0 (2026-10-04)
 
-- No pdfium-binaries update, still at `8076`. Additional builds may use various other versions of pdfium.
 *Runtime*
 - `PdfDocument.get_identifier()`: Fix a blunder that caused one byte too much to be chopped off.
 - `PdfDocument` and `PdfImage.load_jpeg()`: With byte stream input, in the `_buffer_reader` callback, check that the number of bytes read into the buffer is no less than the buffer's size, otherwise indicate error.
@@ -21,6 +20,7 @@
   * `PdfBookmark.get_style()` and `PdfBookmarkStyle`.
 
 *Builds*
+- Updated pdfium-binaries from `7999` to `8076`.
 - Build scripts & CI: Updated PDFium pin from `7913` to `8076`.
   * Updated `gn-dist` from `2407.3` to `2540.0` (the `2501` build passed unused by pypdfium2).
 - Pyodide: Patch freetype load flags to avoid `FT_Load_Glyph()` somehow corrupting the heap. It seems that this addresses the previously encountered crashes/freezes; however, the exact cause remains elusive. Anyway, many thanks to Hood Chatham for this finding.
@@ -50,7 +50,6 @@ In part, this has been a result of outsourcing the pdfium dependency (which seem
 
 ## 5.14.0b1 (2026-10-02)
 
-- Updated pdfium-binaries from `7999` to `8076`. Additional builds may use various other versions of pdfium.
 - See the beta release notes on GitHub [here](https://github.com/pypdfium2-team/pypdfium2/releases/tag/5.14.0b1)
 
 
