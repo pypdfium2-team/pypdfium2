@@ -4,3 +4,4 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- Updated `BUILD_LICENSES` to include newer third-party dependencies of PDFium.
