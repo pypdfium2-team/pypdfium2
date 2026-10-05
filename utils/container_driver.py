@@ -65,14 +65,14 @@ def get_image(image, cibw_os, docker_cpu):
     image, *version = image.split(":", maxsplit=1)
     assert image in ValidImagesMap[cibw_os]
     
-    if not version:
+    if version:
+        version, = version
+    else:
         version = {
             "debian": ("bookworm-slim" if docker_cpu == "mips64le" else "trixie-slim"),
             "manylinux2014": None,
             "alpine": '3',
         }[image]
-    else:
-        version, = version
     
     return ImageInfo(image, version)
 
