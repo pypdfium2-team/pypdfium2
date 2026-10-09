@@ -649,7 +649,8 @@ class _LazyClass:
     def ctypesgen(self):
         
         if not CtypesgenDir.exists():
-            log("Warning: ctypesgen is not in place yet, we'll clone it for you...")
+            log("ctypesgen is not in place yet - we'll clone it for you at the latest revision.\n"
+                "WARNING: If you're on a non-latest commit, you have to prepare a matching version of ctypesgen on your own!")
             mkdir(CtypesgenDir.parent)
             run_cmd(["git", "clone", "--depth", "1", "-b", _CTG_BRANCH, "https://github.com/pypdfium2-team/ctypesgen"], cwd=CtypesgenDir.parent)
         else:

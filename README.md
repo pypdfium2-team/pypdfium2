@@ -65,7 +65,7 @@ cd pypdfium2/
 #### Setup Dependencies
 
 *Python*
-+ [`ctypesgen` (pypdfium2-team fork)](https://github.com/pypdfium2-team/ctypesgen). To be cloned into pypdfium2's source tree, [as shown above](#get-the-code). Not managed as a classical package. As a matter of convenience (and compatibility), setup will automatically clone ctypesgen if you don't.
++ [`ctypesgen` (pypdfium2-team fork)](https://github.com/pypdfium2-team/ctypesgen). This is a source-level dependency [as shown above](#get-the-code), as opposed to a package dependency. Setup will automatically clone ctypesgen at the latest revision if you don't.
 + `setuptools`
 + `wheel`, if setuptools is `< v70.1.0`
 
@@ -79,7 +79,7 @@ Python dependencies should be automatically installed, unless `--no-build-isolat
 > [!NOTE]
 > pypdfium2 and its ctypesgen fork are developed in sync, i.e. each pypdfium2 commit ought to be coupled with the then `HEAD` of pypdfium2-ctypesgen.<br>
 > Our release sdists, and latest pypdfium2 from git, will automatically use matching ctypesgen.<br>
-> However, when using a non-latest commit, you'll have to set up the right ctypesgen version on your own.
+> However, when using a non-latest commit, you'll have to set up the right ctypesgen version on your own (for release commits, the ctypesgen revision is captured in [`autorelease/record.json`](autorelease/record.json)).
 
 #### Default setup
 
