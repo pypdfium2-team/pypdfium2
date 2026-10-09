@@ -88,8 +88,11 @@ LICENSES_SHARED = (
     "LICENSES/CC-BY-4.0.txt",
 )
 LICENSES_SDIST = (
-    # our sdists don't currently include tests, so we don't need to list the other licenses here
     "REUSE.toml",
+    # test resource licenses
+    "LICENSES/LGPL-3.0-or-later.txt",
+    "LICENSES/MIT.txt",
+    "LICENSES/MPL-2.0.txt",
 )
 
 
