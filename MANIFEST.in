@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+# https://setuptools.pypa.io/en/latest/userguide/miscellaneous.html#controlling-files-in-the-distribution
+
 # MANIFEST.in defines the files to include in an sdist. sdists are also the starting point for wheels.
 # Additional files may be included using setuptools (e.g. package_data, license_files)
 # We want this to be a tight ruleset, i.e. only include the minimum of files we actually need for packaging/installation.
@@ -29,5 +31,10 @@ graft LICENSES/
 graft BUILD_LICENSES/
 include REUSE.toml
 
-# PyPA eagerly includes tests - exclude because we don't use them
-prune tests
+# Include tests, with resources
+include tests/*.py
+include tests/expectations/*.txt
+graft tests/resources/
+
+# make sure we never include pycache files
+global-exclude *.py[cod]

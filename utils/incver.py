@@ -83,7 +83,6 @@ def handle_versions():
     
     new_ver_map, pdfium_update = _versioning_impl(config, prev_ver_map, prev_pdfium, new_pdfium)
     new_tag = merge_tag(new_ver_map, mode=None)
-    write_json(AR_RecordFile, dict(tag=new_tag, pdfium=new_pdfium, post_pdfium=None))
     
     is_beta = new_ver_map["beta"] is not None
     return VersionInfo(
@@ -103,6 +102,8 @@ def update_refbindings(version):
     )
     shutil.copyfile(BindingsFile, RefBindingsFile)
     assert RefBindingsFile.exists()
+    ctypesgen_sha = run_cmd(["git", "rev-parse", "HEAD"], cwd=CtypesgenDir, capture=True)
+    return ctypesgen_sha
 
 
 def log_changes(summary, v_info: VersionInfo):
@@ -271,7 +272,8 @@ def main():
     
     args = parse_args()
     v_info = handle_versions()
-    update_refbindings(v_info.new_pdfium)
+    ctypesgen_sha = update_refbindings(v_info.new_pdfium)
+    write_json(AR_RecordFile, {"tag": v_info.new_tag, "ctypesgen": ctypesgen_sha, "pdfium": v_info.new_pdfium, "post_pdfium": None})
     
     summary = get_next_changelog(flush=(not v_info.is_beta))
     log_changes(summary, v_info)
