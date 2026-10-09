@@ -71,6 +71,10 @@
             "runner_os": "ubuntu-26.04-arm",
             "pbin_target": "linux_musl_arm64",
             "test_on_host": false},
+        "musllinux_armv7l": {
+            "runner_os": "ubuntu-26.04-arm",
+            "pbin_target": "linux_musl_arm32",
+            "test_on_host": false},
         "android_arm64_v8a": {
             "runner_os": "ubuntu-26.04-arm",
             "pbin_target": "android_arm64",

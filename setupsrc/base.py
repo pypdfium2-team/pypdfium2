@@ -108,6 +108,7 @@ class PlatNames:
     linux_musl_x64   = SysNames.linux   + "_musl_x64"
     linux_musl_x86   = SysNames.linux   + "_musl_x86"
     linux_musl_arm64 = SysNames.linux   + "_musl_arm64"
+    linux_musl_arm32 = SysNames.linux   + "_musl_arm32"
     android_arm64    = SysNames.android + "_arm64"       # device
     android_arm32    = SysNames.android + "_arm32"       # device
     android_x64      = SysNames.android + "_x64"         # simulator
@@ -134,6 +135,7 @@ PdfiumBinariesMap = {
     PlatNames.linux_musl_x64:   "linux-musl-x64",
     PlatNames.linux_musl_x86:   "linux-musl-x86",
     PlatNames.linux_musl_arm64: "linux-musl-arm64",
+    PlatNames.linux_musl_arm32: "linux-musl-arm",
     PlatNames.android_arm64:    "android-arm64",
     PlatNames.android_arm32:    "android-arm",
     PlatNames.android_x64:      "android-x64",
@@ -552,7 +554,7 @@ class _host_platform:
             elif mach == "aarch64":
                 return self._handle_linux("arm64")
             elif mach in ("armv7l", "armv8l"):
-                return self._handle_linux("arm32", musl_ok=False)
+                return self._handle_linux("arm32")
             elif mach in ("ppc64le", "mips64le", "mipsle"):
                 return self._handle_linux(mach, musl_ok=False)
         
