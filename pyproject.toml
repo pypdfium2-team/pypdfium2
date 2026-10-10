@@ -10,9 +10,6 @@ requires = [
     "wheel !=0.38.0, !=0.38.1",
 ]
 
-# We prefer dependency-groups (PEP 735) over optional-dependencies (extras), for two main reasons:
-# - Installation is independent of pypdfium2 itself. e.g. you can install the setup group first, then install pypdfium2 with --no-build-isolation. Likewise, you may want to install the converters or test dependencies without re-installing pypdfium2.
-# - BUG(177): PyPI actually refuses upload if external (@ git+) dependencies end up in package metadata. PEP 735 emphasizes the idea that dependency groups "are not included in any built distribution of the project".
 [dependency-groups]
 converters = [
     "pillow",
