@@ -32,6 +32,7 @@ graft BUILD_LICENSES/
 include REUSE.toml
 
 # Include tests, with resources
+include utils/minitest.py
 include tests/*.py
 include tests/expectations/*.txt
 graft tests/resources/
