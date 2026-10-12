@@ -240,7 +240,7 @@ jobs:
     with:
       runner_os: ${{ matrix.runner_os }}
       test_os: ${{ matrix.test_os }}
-      # cibw_py_ver: ${{ ... }}  # TODO
+      #cibw_py_ver: ${{ ... }}  # TODO
       testos_py_vers: ${{ matrix.testos_py_vers }}
       cibw_target: ${{ matrix.cibw_target }}
       cibw_arch: ${{ matrix.cibw_arch }}
@@ -275,7 +275,7 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: release_info
-          path: release_info/
+          skip-decompress: true
       
       - name: Download wheels & sdist
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -299,7 +299,7 @@ jobs:
         run: |
           twine check dist/*
           check-wheel-contents dist/*.whl
-          ls -l release_info/
+          file release_info.zip
       
       - name: Mask non-PyPI builds
         run: |
@@ -345,11 +345,11 @@ jobs:
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           packages-dir: dist/  # the default
-          # skip-existing: true
+          #skip-existing: true
       
       - name: Publish to GitHub
         if: ${{ inputs.actually_publish }}
-        run: gh release create "$TAG" --notes-file release_info/RELEASE.md --verify-tag $BETA_FLAG artifacts/* release_info/*.{json,txt} pypdfium2-attestation.json
+        run: gh release create "$TAG" --notes-file release_info/RELEASE.md --verify-tag $BETA_FLAG artifacts/* release_info.zip pypdfium2-attestation.json
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.prepare.outputs.version }}
