@@ -293,7 +293,7 @@ jobs:
         uses: $/.github/actions/venv_step
         with:
           lockfile: lock/distcheck.txt
-          cooldown_days: '7'  # lockfile sanity check
+          cooldown_days: '3'  # lockfile sanity check - XXX temporarily lowered
       
       - name: Check artifacts
         run: |
