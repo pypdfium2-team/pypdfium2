@@ -12,7 +12,7 @@
 set script-interpreter := ['bash', '-euo', 'pipefail']
 verbose := 'set -x'
 
-BROWSER := env('BROWSER', 'google-chrome')
+BROWSER := env('BROWSER', 'firefox')
 BUILD_PARAMS := env('BUILD_PARAMS', '')
 
 # NOTE: When run without arguments, just implicitly calls the first command - this means `list` should go first here.
@@ -43,7 +43,7 @@ docs-build:  # *args
 	python3 -m sphinx -b html docs/source docs/build/html
 [env('BROWSER', BROWSER)]
 docs-open:
-	"$BROWSER" docs/build/html/index.html &>/dev/null &
+	"$BROWSER" file://{{justfile_directory()}}/docs/build/html/index.html &>/dev/null &
 docs-clean:
 	rm -rf docs/build/html
 
@@ -52,7 +52,7 @@ _coverage_impl OMISSIONS *args:
 	python3 -m coverage run --omit "{{OMISSIONS}}" -m pytest tests/ {{args}}
 	python3 -m coverage report
 	python3 -m coverage html
-	"$BROWSER" ./htmlcov/index.html &
+	"$BROWSER" file://{{justfile_directory()}}/htmlcov/index.html &>/dev/null &
 coverage *args:
 	just _coverage_impl "src/pypdfium2_raw/bindings.py,tests/*,setupsrc/*" {{args}}
 coverage-core *args:
