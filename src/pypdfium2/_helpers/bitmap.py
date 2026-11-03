@@ -18,7 +18,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     Bitmap helper class.
     
     Note:
-        There are two types of bitmaps, "native" (python or caller-side) and "foreign" (pdfium-internal). When bitmap construction is controlled by the embedder, using the native type is recommended.
+        There are two types of bitmap buffers, "native" (python or caller-side) and "foreign" (pdfium-internal). Where bitmap construction is under the caller's control, using the native type is highly recommended.
     
     Important:
         Closing/finalization behavior differs between native and foreign bitmaps.\n
