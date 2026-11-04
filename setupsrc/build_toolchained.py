@@ -180,6 +180,7 @@ def handle_portable_mode(config, use_sysroot, clang_path):
         config.update({
             "is_clang": False,
             "use_custom_libcxx": False,
+            "pdf_use_libyuv": False,
         })
         if use_sysroot:
             log("Warning: --use-sysroot with GCC / system libcxx. This may or may not work. If it fails, bring your own clang and pass --clang-path.")
