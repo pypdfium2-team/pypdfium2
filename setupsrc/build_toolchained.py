@@ -126,12 +126,12 @@ def patch_pdfium(build_ver, target_cpu, target_os, patch_clang, prefer_gcc):
     
     if sys.platform.startswith("linux"):
         is_mips = target_cpu in ("mips64el", "mipsel")
-        is_mips_clang = is_mips and not prefer_gcc
         if target_cpu == "ppc64":
             git_apply_patch(PatchDir/"unknown_cpu.patch", PDFiumDir)
-        if is_mips_clang:
+        if is_mips:
             git_apply_patch(PatchDir/"mips_cross.patch", PDFiumDir_build)
-        if (PORTABLE_MODE and patch_clang) or is_mips_clang:
+            git_apply_patch(PatchDir/"mips_highway.patch", PDFiumDir/"third_party"/"highway"/"src")
+        if (PORTABLE_MODE and patch_clang) or is_mips:
             git_apply_patch(PatchDir/"no_libclang_rt.patch", PDFiumDir_build)
         if PORTABLE_MODE and patch_clang:
             git_apply_patch(PatchDir/"clang_22_compat.patch", PDFiumDir_build)
