@@ -1,5 +1,5 @@
 diff --git a/config/BUILDCONFIG.gn b/config/BUILDCONFIG.gn
-index 538bb3d..ffb2253 100644
+index 7fdc383..caccd67 100644
 --- a/config/BUILDCONFIG.gn
 +++ b/config/BUILDCONFIG.gn
 @@ -381,8 +381,8 @@ default_compiler_configs = [
@@ -8,16 +8,16 @@ index 538bb3d..ffb2253 100644
    "//build/config/compiler:runtime_library",
 -  "//build/config/compiler:sanitize_c_array_bounds",
 -  "//build/config/compiler:sanitize_return",
-+  # "//build/config/compiler:sanitize_c_array_bounds",
-+  # "//build/config/compiler:sanitize_return",
++  #"//build/config/compiler:sanitize_c_array_bounds",
++  #"//build/config/compiler:sanitize_return",
+   "//build/config/compiler:sanitize_unreachable",
    "//build/config/compiler:thin_archive",
    "//build/config/compiler:thinlto_optimize_default",
-   "//build/config/compiler:tot_warnings",
 diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
-index 6521073..23eab92 100644
+index e39f7df..86e518d 100644
 --- a/config/compiler/BUILD.gn
 +++ b/config/compiler/BUILD.gn
-@@ -588,14 +588,6 @@ config("compiler") {
+@@ -594,14 +594,6 @@ config("compiler") {
    if (is_clang) {
      # Flags for diagnostics.
      cflags += [ "-fcolor-diagnostics" ]
@@ -32,7 +32,7 @@ index 6521073..23eab92 100644
      if (diagnostics_print_source_range_info && !is_win) {
        cflags += [ "-fdiagnostics-print-source-range-info" ]
      }
-@@ -626,13 +618,6 @@ config("compiler") {
+@@ -632,13 +624,6 @@ config("compiler") {
        ]
      }
  
@@ -46,7 +46,7 @@ index 6521073..23eab92 100644
      # TODO(hans): Remove this once Clang generates better optimized debug info
      # by default. https://crbug.com/765793
      cflags += [
-@@ -1961,7 +1946,7 @@ config("default_warnings") {
+@@ -2027,7 +2012,7 @@ config("default_warnings") {
          "-Wno-uninitialized-const-pointer",
  
          # TODO(crbug.com/495753203): Fix and re-enable.
