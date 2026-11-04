@@ -106,7 +106,7 @@ def _create_resources_rc(build_ver):
     content = content.replace("$VERSION", str(build_ver))
     output_path.write_text(content)
 
-def patch_pdfium(build_ver, target_cpu, target_os, patch_clang, prefer_gcc):
+def patch_pdfium(build_ver, target_cpu, target_os, patch_clang):
     # TODO in the future, we might want to extract separate DLLs for the imaging libraries (e.g. libjpeg, libpng)
     
     shared_autopatches(PDFiumDir)
@@ -237,7 +237,6 @@ def main(
         win_sdk_dir  = None,
         target_cpu   = None,
         target_os    = None,
-        prefer_gcc   = None,
         use_sysroot  = None,
         clang_path   = None,
     ):
@@ -253,15 +252,13 @@ def main(
     
     v_full, pdfium_rev, chromium_rev = handle_sbuild_vers(build_ver)
     config = DefaultConfig.copy()
-    if prefer_gcc:
-        config["is_clang"] = False
     patch_clang = handle_portable_mode(config, use_sysroot, clang_path)
     handle_windows(win_sdk_dir)
     
     orig_path = dl_depottools(do_update)
     did_pdfium_sync = dl_pdfium(do_update, pdfium_rev, target_os, orig_path)
     if did_pdfium_sync:
-        patch_pdfium(build_ver, target_cpu, target_os, patch_clang, prefer_gcc)
+        patch_pdfium(build_ver, target_cpu, target_os, patch_clang)
     
     is_cross = handle_cross(config, target_cpu, target_os)
     config_str = serialize_gn_config(config)
@@ -304,11 +301,6 @@ def parse_args(argv):
     parser.add_argument(
         "--target-os",
         help = "The target operating system, similar to --target-cpu. This is intended for compiling the mobile platforms (e.g. Android) from a desktop device. Note, this script has some issues with rebuilds - you may need to pass --update so that new patches can be applied."
-    )
-    parser.add_argument(
-        "--prefer-gcc",
-        action = "store_true",
-        help = "Attempt to use GCC for (cross-)compilation. This will set is_clang = false but leave use_custom_libcxx unchanged. This may or may not work for you, as the vendored libc++ requires a very cutting edge compiler. This option is effectively ignored in PORTABLE_MODE, where GCC & system libc++ are default.",
     )
     parser.add_argument(
         "--use-sysroot",
