@@ -86,6 +86,18 @@ SPDX-License-Identifier = "BSD-3-Clause AND Apache-2.0"
 SPDX-FileComment = "See above regarding pdfium's double-license."
 
 [[annotations]]
+path = ["patches/riscv64_stretchengine.patch",]
+precedence = "aggregate"
+SPDX-FileCopyrightText = [
+    "2026 PDFium developers",
+]
+SPDX-License-Identifier = "BSD-3-Clause AND Apache-2.0"
+SPDX-FileComment = '''
+From https://pdfium-review.googlesource.com/c/pdfium/+/161950
+See above regarding pdfium's double-license.
+'''
+
+[[annotations]]
 path = ["tests/resources/images.pdf"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
@@ -106,7 +118,7 @@ path = [
     "patches/win/use_resources_rc.patch",
     "patches/win/build.patch",
     "patches/win/resources.rc",
-    "patches/armhf_highway.patch",
+    "patches/armhf_scanline.patch",
     "patches/mips_highway.patch",
 ]
 precedence = "aggregate"
