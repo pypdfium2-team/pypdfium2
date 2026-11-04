@@ -38,6 +38,7 @@ _WheeltagPatterns = {
     PlatNames.linux_musl_x64:   ("musllinux_{}_x86_64",  "1_1"),
     PlatNames.linux_musl_x86:   ("musllinux_{}_i686",    "1_1"),
     PlatNames.linux_musl_arm64: ("musllinux_{}_aarch64", "1_1"),
+    PlatNames.linux_musl_arm32: ("musllinux_{}_armv7l",  "1_1"),
     
     # Android - see PEP 738 # Packaging
     # pdfium-binaries/steps/05-configure.sh says default_min_sdk_version = 23
