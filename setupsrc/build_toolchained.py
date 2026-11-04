@@ -121,7 +121,8 @@ def patch_pdfium(build_ver, target_cpu, target_os, patch_clang):
             git_apply_patch(PatchDir/"win"/"arm64_native.patch", PDFiumDir_build)
     
     if target_os == "android":
-        # without this patch, we end up with a tiny binary that has no symbols
+        # Without this patch, we end up with a tiny binary that has no symbols
+        # FIXME(geisserml) This is actually a negative side effect of not declaring a proper component build. Perhaps is_component_build = True and changing dependencies to static would be cleaner than setting is_component_build = False and patching the top-level component to shared? I've never really liked that bit of monkeypatching.
         git_apply_patch(PatchDir/"android_cross.patch", PDFiumDir_build)
     
     if sys.platform.startswith("linux"):
