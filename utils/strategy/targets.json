@@ -191,13 +191,15 @@
             "runner_os": "ubuntu-26.04-arm"},
         "manylinux_armv7l": {
             "runner_os": "ubuntu-26.04-arm",
-            "test_pdfium": false},
+            "test_pdfium": false,
+            "comment": "pdfium_unittests fails to link due to armhf_scanline.patch, which however is necessary to make the build work at all."},
         "manylinux_ppc64le": {
             "runner_os": "ubuntu-26.04",
             "use_sysroot": true},
         "manylinux_s390x": {
             "runner_os": "ubuntu-26.04",
-            "test_pdfium_ignore_failure": true},
+            "test_pdfium_ignore_failure": true,
+            "comment": "The test suite doesn't play well with s390x. Individual suppressions are too tedious."},
         "manylinux_riscv64": {
             "runner_os": "ubuntu-26.04",
             "use_sysroot": true},
@@ -215,12 +217,14 @@
         "musllinux_armv7l": {
             "runner_os": "ubuntu-26.04-arm",
             "pdfium_ver": "latest-binaries",
-            "test_pdfium": false},
+            "test_pdfium": false,
+            "comment": "See manylinux_armv7l for why we set test_pdfium to false here."},
         "musllinux_ppc64le": {
             "runner_os": "ubuntu-26.04"},
         "musllinux_s390x": {
             "runner_os": "ubuntu-26.04",
-            "test_pdfium_ignore_failure": true},
+            "test_pdfium_ignore_failure": true,
+            "comment": "The test suite doesn't play well with s390x. Individual suppressions are too tedious."},
         "musllinux_riscv64": {
             "runner_os": "ubuntu-26.04"},
         "musllinux_loongarch64": {

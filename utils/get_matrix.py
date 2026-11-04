@@ -106,14 +106,12 @@ class Inference:
     
     def pbin(self, target, entry):
         self._add_pys(entry, entry["test_on_host"])
-        return entry
     
     def cibw(self, target, entry):
         entry["cibw_target"] = target
         if "cibw_arch" not in entry:
             entry["cibw_arch"] = entry["cibw_target"].split("_", maxsplit=1)[-1]
         self._add_testpys(entry)
-        return entry
     
     def sbuild(self, target, entry):
         if "tag" not in entry:
@@ -123,7 +121,6 @@ class Inference:
                 tag = f"manylinux_2_17_{arch}.manylinux2014_{arch}"
             entry["tag"] = tag
         self._add_pys(entry, not ("target_os" in entry or "target_cpu" in entry))
-        return entry
 
 
 def get_matrices(args, all_targets):
@@ -131,13 +128,15 @@ def get_matrices(args, all_targets):
     inference_obj = Inference(args.py_vers)
     
     for strategy in STRATEGIES:
-        
         targets = all_targets[strategy]
         matrices[strategy] = matrix_entries = []
         inference = getattr(inference_obj, strategy)
-        
+
         for key in getattr(args, strategy):
-            entry = {"label": f"{strategy}-{key}", **inference(_target_only(key), targets[key])}
+            entry = targets[key].copy()
+            inference(_target_only(key), entry)
+            entry["label"] = f"{strategy}-{key}"
+            entry.pop("comment", None)
             matrix_entries.append(entry)
     
     return matrices
