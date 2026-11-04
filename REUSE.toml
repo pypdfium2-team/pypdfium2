@@ -106,6 +106,7 @@ path = [
     "patches/win/use_resources_rc.patch",
     "patches/win/build.patch",
     "patches/win/resources.rc",
+    "patches/highway_integration.patch"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = [
