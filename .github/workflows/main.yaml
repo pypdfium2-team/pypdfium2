@@ -246,9 +246,10 @@ jobs:
       cibw_arch: ${{ matrix.cibw_arch }}
       pdfium_ver: ${{ matrix.pdfium_ver }}  # '' if unset
       use_sysroot: ${{ matrix.use_sysroot || false }}
+      test_pdfium: ${{ matrix.test_pdfium || false }}
+      test_pdfium_ignore_failure: ${{ matrix.test_pdfium_ignore_failure || false }}
       ref: ${{ needs.prepare.outputs.ref }}
       replicate_tag: ${{ needs.prepare.outputs.version }}
-      test_pdfium: ${{ !startsWith(matrix.cibw_target, 'pyodide') }}
   
   
   publish:

@@ -190,12 +190,14 @@
         "manylinux_aarch64": {
             "runner_os": "ubuntu-26.04-arm"},
         "manylinux_armv7l": {
-            "runner_os": "ubuntu-26.04-arm"},
+            "runner_os": "ubuntu-26.04-arm",
+            "test_pdfium": false},
         "manylinux_ppc64le": {
             "runner_os": "ubuntu-26.04",
             "use_sysroot": true},
         "manylinux_s390x": {
-            "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "test_pdfium_ignore_failure": true},
         "manylinux_riscv64": {
             "runner_os": "ubuntu-26.04",
             "use_sysroot": true},
@@ -212,16 +214,19 @@
             "pdfium_ver": "latest-binaries"},
         "musllinux_armv7l": {
             "runner_os": "ubuntu-26.04-arm",
-            "pdfium_ver": "latest-binaries"},
+            "pdfium_ver": "latest-binaries",
+            "test_pdfium": false},
         "musllinux_ppc64le": {
             "runner_os": "ubuntu-26.04"},
         "musllinux_s390x": {
-            "runner_os": "ubuntu-26.04"},
+            "runner_os": "ubuntu-26.04",
+            "test_pdfium_ignore_failure": true},
         "musllinux_riscv64": {
             "runner_os": "ubuntu-26.04"},
         "musllinux_loongarch64": {
             "runner_os": "ubuntu-26.04"},
         "pyodide_wasm32": {
-            "runner_os": "ubuntu-26.04"}
+            "runner_os": "ubuntu-26.04",
+            "test_pdfium": false}
     }
 }

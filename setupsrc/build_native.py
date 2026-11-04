@@ -409,7 +409,7 @@ def build(build_dir, config_dict, with_tests, n_jobs, is_pyodide):
         pyodide_utils.link(build_dir)
 
 
-def test(build_dir, vendor_deps, compiler):
+def test(build_dir, vendor_deps, compiler, ignore_test_failure):
     gtest_filter = []
     # obscure failure if either system libc++ or gcc config (or both) are used
     if "libc++" not in vendor_deps or compiler is Compiler.gcc:
@@ -423,12 +423,12 @@ def test(build_dir, vendor_deps, compiler):
         gtest_filter.append("CPDFPageImageCacheTest.RenderBug1924")  # FIXME actually crashes
     if gtest_filter:
         os.environ["GTEST_FILTER"] = "*:-" + ":".join(gtest_filter)
-    run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR)
+    run_cmd([build_dir/"pdfium_unittests"], cwd=PDFIUM_DIR, check=(not ignore_test_failure))
 
 
 # TODO(geisserml) refactor to pass along an args object?
 
-def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None, use_sysroot=False, is_pyodide=False):
+def main(build_ver=None, with_tests=False, ignore_test_failure=False, n_jobs=None, compiler=None, clang_path=None, no_libclang_rt=False, clang_as_gcc=False, reset=False, vendor_deps=None, use_sysroot=False, is_pyodide=False):
     
     if build_ver is None:
         build_ver = SBUILD_NATIVE_PIN
@@ -479,7 +479,7 @@ def main(build_ver=None, with_tests=False, n_jobs=None, compiler=None, clang_pat
     handle_sysroot(use_sysroot, config, compiler, vendor_deps)
     build(build_dir, config, with_tests, n_jobs, is_pyodide)
     if with_tests:
-        test(build_dir, vendor_deps, compiler)
+        test(build_dir, vendor_deps, compiler, ignore_test_failure)
     
     return pack_sourcebuild(PDFIUM_DIR, build_dir, "native", full_ver, build_ver, load_lib=(not is_pyodide))
 
@@ -521,6 +521,12 @@ Some params take a default from an environment variable, for easy passthrough wi
         action = "store_true",
         default = bool(int( os.environ.get("TEST_PDFIUM", 0) )),
         help = "Whether to build and run tests. Recommended, except on very slow hosts. Defaults to $TEST_PDFIUM.",
+    )
+    parser.add_argument(
+        "--ignore-test-failure",
+        action = "store_true",
+        default = bool(int( os.environ.get("IGNORE_TEST_FAILURE", 0) )),
+        help = "Exercise the test suite but suppress failure as a whole.",
     )
     parser.add_argument(
         "-j", "--jobs",

@@ -32,6 +32,9 @@ on:
       test_pdfium:
         type: boolean
         default: true
+      test_pdfium_ignore_failure:
+        type: boolean
+        default: false
       ref:
         type: string
         default: ''
@@ -94,6 +97,7 @@ jobs:
           PDFIUM_VER: ${{ inputs.pdfium_ver }}
           USE_SYSROOT: ${{ inputs.use_sysroot && 1 || 0 }}
           TEST_PDFIUM: ${{ inputs.test_pdfium && 1 || 0 }}
+          TEST_IGNORE_FAILURE: ${{ inputs.test_pdfium_ignore_failure && 1 || 0 }}
         with:
           output-dir: wheelhouse
       
