@@ -37,6 +37,7 @@ DEPS_URLS = dict(
     zlib        = _CR_PREFIX + "chromium/src/third_party/zlib",
     harfbuzz    = _CR_PREFIX + "external/github.com/harfbuzz/harfbuzz",
     dragonbox   = _CR_PREFIX + "external/github.com/jk-jeon/dragonbox",
+    highway     = _CR_PREFIX + "external/github.com/google/highway",
     # unittests
     gtest      = _CR_PREFIX + "external/github.com/google/googletest",
     test_fonts = _CR_PREFIX + "chromium/src/third_party/test_fonts",
@@ -47,6 +48,7 @@ PDFIUM_DIR_build = PDFIUM_DIR / "build"
 PDFIUM_3RDPARTY = PDFIUM_DIR / "third_party"
 CUSTOM_TOOLCHAIN_DIR = PDFIUM_DIR_build/"toolchain"/"linux"/"custom"
 
+# TODO(geisserml) build with libyuv?
 DefaultConfig = {
     "is_debug": False,
     "use_glib": False,
@@ -57,7 +59,9 @@ DefaultConfig = {
     "pdf_is_standalone": True,
     "pdf_enable_v8": False,
     "pdf_enable_xfa": False,
+    "pdf_enable_brotli": False,
     "pdf_use_skia": False,
+    "pdf_use_libyuv": False,
     "pdf_use_partition_alloc": False,
     "use_sysroot": False,
     "use_cxx23": False,
@@ -144,7 +148,7 @@ class _DeferredDeps:
 
 def handle_deps(config, vendor_deps, with_tests):
     
-    deps_fields = ["build", "abseil", "fast_float", "simdutf", "dragonbox"]
+    deps_fields = ["build", "abseil", "fast_float", "simdutf", "dragonbox", "highway"]
     
     if "libc++" in vendor_deps:
         deps_fields += ("buildtools", "libcxx", "libcxxabi", "llvm_libc")
@@ -292,6 +296,7 @@ checkout_libpng = true\
     df.fetch("fast_float", PDFIUM_3RDPARTY/"fast_float"/"src")
     df.fetch("simdutf", PDFIUM_3RDPARTY/"simdutf")
     df.fetch("dragonbox", PDFIUM_3RDPARTY/"dragonbox"/"src")
+    df.fetch("highway", PDFIUM_3RDPARTY/"highway"/"src")
     
     if "libc++" in vendor_deps:
         df.fetch("buildtools", PDFIUM_DIR/"buildtools")
