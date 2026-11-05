@@ -191,7 +191,7 @@
             "runner_os": "ubuntu-26.04-arm"},
         "manylinux_armv7l": {
             "runner_os": "ubuntu-26.04-arm",
-            "test_pdfium": false,
+            "dont_test_pdfium": true,
             "comment": "pdfium_unittests fails to link due to armhf_scanline.patch, which however is necessary to make the build work at all."},
         "manylinux_ppc64le": {
             "runner_os": "ubuntu-26.04",
@@ -217,8 +217,8 @@
         "musllinux_armv7l": {
             "runner_os": "ubuntu-26.04-arm",
             "pdfium_ver": "latest-binaries",
-            "test_pdfium": false,
-            "comment": "See manylinux_armv7l for why we set test_pdfium to false here."},
+            "dont_test_pdfium": true,
+            "comment": "See manylinux_armv7l for why we skip pdfium_unittests here."},
         "musllinux_ppc64le": {
             "runner_os": "ubuntu-26.04"},
         "musllinux_s390x": {
@@ -231,6 +231,7 @@
             "runner_os": "ubuntu-26.04"},
         "pyodide_wasm32": {
             "runner_os": "ubuntu-26.04",
-            "test_pdfium": false}
+            "dont_test_pdfium": true,
+            "comment": "Seems impossible to run pdfium_unittests on this platform."}
     }
 }
