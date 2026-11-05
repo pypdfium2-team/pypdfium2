@@ -206,17 +206,13 @@
         "manylinux_loongarch64": {
             "runner_os": "ubuntu-26.04"},
         "musllinux_x86_64": {
-            "runner_os": "ubuntu-26.04",
-            "pdfium_ver": "latest-binaries"},
+            "runner_os": "ubuntu-26.04"},
         "musllinux_i686": {
-            "runner_os": "ubuntu-26.04",
-            "pdfium_ver": "latest-binaries"},
+            "runner_os": "ubuntu-26.04"},
         "musllinux_aarch64": {
-            "runner_os": "ubuntu-26.04-arm",
-            "pdfium_ver": "latest-binaries"},
+            "runner_os": "ubuntu-26.04-arm"},
         "musllinux_armv7l": {
             "runner_os": "ubuntu-26.04-arm",
-            "pdfium_ver": "latest-binaries",
             "dont_test_pdfium": true,
             "comment": "See manylinux_armv7l for why we skip pdfium_unittests here."},
         "musllinux_ppc64le": {
