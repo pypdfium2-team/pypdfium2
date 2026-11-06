@@ -4,7 +4,7 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
-- Updated build scripts from PDFium `8076` to `8142`. Updated gn-dist to `2612`.
+- Updated build scripts from PDFium `8076` to `8146`. Updated gn-dist to `2612`.
   This was once again a mad amount of work as half the CIBW and SBLD targets had been broken by the update.
   FWIW, this PDFium update includes fixes for various CVEs across the software stack.
   However, note that you should not expose (py)pdfium to untrusted input in any case, at least not in an unsandboxed environment.
