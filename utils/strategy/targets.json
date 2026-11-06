@@ -122,13 +122,12 @@
         "win_arm64": {
             "runner_os": "windows-latest",
             "test_os": "windows-11-arm",
-            "target_cpu": "arm64"},
+            "target_cpu": "arm64",
+            "comment": "This is cross-compilation. Native compilation on Windows arm64 works through CIBW but it's currently broken with build_toolchained.py standalone. I suspect CIBW installs some missing build tooling."},
         "win32": {
             "runner_os": "windows-latest",
             "target_cpu": "x86",
             "need_py_vers": true},
-        "win_arm64:native": {
-            "runner_os": "windows-11-arm"},
         "manylinux_x86_64": {
             "runner_os": "ubuntu-24.04"},
         "manylinux_i686": {
