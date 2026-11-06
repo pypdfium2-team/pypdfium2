@@ -53,7 +53,7 @@ ignore = ["W002", "W009", "W010"]
 
 [tool.cibuildwheel]
 build-frontend = {name="build", args=["-xn"]}
-environment-pass = ["PDFIUM_VER", "USE_SYSROOT", "TEST_PDFIUM", "IGNORE_TEST_FAILURE"]
+environment-pass = ["PDFIUM_VER", "USE_SYSROOT", "TEST_PDFIUM", "TEST_IGNORE_FAILURE"]
 before-build = [
     "pip install --uploaded-prior-to P7D --group setup",
 ]
