@@ -830,7 +830,7 @@ To the author's knowledge, pypdfium2 is one of the rare Python libraries capable
 Note that the exact licensing situation depends on the build config/environment used.<br>
 In particular, a subset of pypdfium2 builds may link with the `libgcc` runtime library. Check the builds you use and, if affected, libgcc's license [to evaluate if that's OK for your use](https://wiki.osdev.org/Libgcc#What_is_the_libgcc_license?).
 
-[^liberal_pdf_renderlibs]: Other mature, liberal-licensed PDF rendering libraries known to the author are [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java). While they can be accessed from Python in principle, as shown in the author's gists ([pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7)), there don't seem to be proper python bindings projects to these libraries yet. Lately, some new options have surfaced, e.g. `docling-parse`. Also, AI/vibe-coded "projects" (for want of a better term) are currently springing up like mushroom (particularly on GitHub), BUT we strongly recommend against their use. Don't fall for AI crap. You'll really want to stick with mature, high-quality codebases that have been around well before the AI boom and are genuinely human authored and understood.
+[^liberal_pdf_renderlibs]: Other mature, liberal-licensed PDF rendering libraries include [`pdf.js`](https://github.com/mozilla/pdf.js/) (JavaScript) and [`Apache PDFBox`](https://github.com/apache/pdfbox) (Java). They can be accessed from Python in principle, as demonstrated in gists ([pdfbox](https://gist.github.com/mara004/51c3216a9eabd3dcbc78a86d877a61dc), [pdfjs](https://gist.github.com/mara004/87276da4f8be31c80c38036c6ab667d7)), but there don't seem to be through, pythonic bindings beyond that. Lately, some new options have surfaced, e.g. `docling-parse`. Also, there is a flood of AI/vibe-coded "projects" (for want of a better term), but we strongly recommend against their use. Don't fall for AI crap. You really wanna stick with mature, high-quality codebases that have been around well before the AI boom and are genuinely human authored and understood.
 
 ## Issues / Contributions
 
@@ -961,18 +961,15 @@ find . -name '*.pdf' -exec bash -c "echo \"{}\" && pypdfium2 toc \"{}\"" \;
 <!-- TODO document release workflow -->
 
 
-## Popular dependents
+## Dependents & supply chain considerations
 
-pypdfium2 is used by popular packages such as
-[langchain](https://github.com/langchain-ai/langchain),
-[dify](https://github.com/langgenius/dify),
-[docling](https://github.com/DS4SD/docling),
-[nougat](https://github.com/facebookresearch/nougat),
-[pdfplumber](https://github.com/jsvine/pdfplumber),
-[doctr](https://github.com/mindee/doctr/),
-and [nv-ingest](https://github.com/NVIDIA/nv-ingest).
+As of 2026, pypdfium2 is being relied on by some fairly popular dependents, including ocrmypdf.
 
-This results in pypdfium2 being part of a large dependency tree.
+This results in pypdfium2 being part of a large dependency tree and having rather high monthly download count.
+
+This causes us to prioritize stability and take some caution with new releases. This translates to a slowed-down release schedule and more interest in consolidation & code quality improvement than new features which add maintenance burden.
+
+We also highly recommend the use of lockfiles and dependency cooldowns, since the main thing to be concerned about is an actual supply chain attack (in the sense of a project being compromised), whereas edge-case memory inaccuracies are little to no concern even if they might get assigned CVEs with absurdly high scores. Since there is no way to ever be sure to be free of these it's just something you have to calculate with. Make sure you don't work with untrusted, potentially malicious input, and/or use a sandboxed environment.
 
 
 ## Thanks to[^thanks_to]
