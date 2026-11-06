@@ -2964,6 +2964,11 @@ if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetMarkedContentID'):
     FPDF_StructElement_GetMarkedContentID.argtypes = (FPDF_STRUCTELEMENT, )
     FPDF_StructElement_GetMarkedContentID.restype = c_int
 
+if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetRawType'):
+    FPDF_StructElement_GetRawType = _libs['pdfium']['FPDF_StructElement_GetRawType']
+    FPDF_StructElement_GetRawType.argtypes = (FPDF_STRUCTELEMENT, POINTER(FPDF_WCHAR), c_size_t)
+    FPDF_StructElement_GetRawType.restype = c_ulong
+
 if hasattr(_libs['pdfium'], 'FPDF_StructElement_GetType'):
     FPDF_StructElement_GetType = _libs['pdfium']['FPDF_StructElement_GetType']
     FPDF_StructElement_GetType.argtypes = (FPDF_STRUCTELEMENT, POINTER(None), c_ulong)
