@@ -523,7 +523,7 @@ Some params take a default from an environment variable, for easy passthrough wi
     parser.add_argument(
         "--ignore-test-failure",
         action = "store_true",
-        default = bool(int( os.environ.get("IGNORE_TEST_FAILURE", 0) )),
+        default = bool(int( os.environ.get("TEST_IGNORE_FAILURE", 0) )),
         help = "Exercise the test suite but suppress failure as a whole.",
     )
     parser.add_argument(
