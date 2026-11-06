@@ -16,7 +16,7 @@
 - `build_native.py`: Restore compatibility with git versions prior to `2.49`.
 - Handle new pdfium-binaries for `musllinux_armv7l` in setup. (However, we still prefer CIBW for musllinux release builds.)
 - Include tests in sdist, and capture release ctypesgen version in `autorelease/record.json`, to provide a better basis for packaging. Thanks to Ihar Hrachyshka for bringing this up.
-- Updated `BUILD_LICENSES` to include newer third-party dependencies of PDFium. Deduplicated 5 instances of the Apache-2.0 license within `BUILD_LICENSES`.
+- Added harfbuzz and dragonbox to `BUILD_LICENSES`. Moved simdutf and highway from v8_xfa to top-level. Deduplicated some instances of the Apache-2.0 license within `BUILD_LICENSES`.
 
 
 ## 5.14.0 (2026-10-04)
