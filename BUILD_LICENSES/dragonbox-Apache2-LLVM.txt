@@ -1,4 +1,4 @@
-#include ./SHARED_LICENSES/Apache-2.0.txt
+#include ./SHARED/Apache-2.0.txt
 
 --- LLVM Exceptions to the Apache 2.0 License ----
 
