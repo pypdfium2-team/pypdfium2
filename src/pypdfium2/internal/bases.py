@@ -163,15 +163,12 @@ class AutoCloseable (AutoCastable):
             self.raw = None
             return False
         
-        # only need to check this in manual closing, with finalizers the API contract promises the order of invocation
-        need_close = []
-        for k_wref in self._kids:
+        # Only need to check this in manual closing, with finalizers the API contract promises the order of invocation.
+        # Important: MUST iterate over a copy, since GC might interfere and finalize one of the objects while the loop runs.
+        for k_wref in self._kids.copy():
             k = k_wref()
             if k and k.raw:
-                # closing a child will remove it from the parent's kids set, so again outsource the actual closing to avoid "RuntimeError: Set changed size during iteration"
-                need_close.append(k)
-        for k in need_close:
-            k.close(_by_parent=True)
+                k.close(_by_parent=True)
         
         if self._kids:
             logger.warning(f"Some kids weakrefs have not been cleaned up: {self._kids}")

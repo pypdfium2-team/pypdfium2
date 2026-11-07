@@ -30,22 +30,15 @@ def init_lib():
 
 
 def _close_objects():
-    
-    need_close = []
-    for cls, obj_wrefs in pdfium_i.ObjectTracker.items():
+    for cls, obj_wrefs in pdfium_i.ObjectTracker.copy().items():
         # pdfium_i._debug_close(f"{cls and cls.__name__}: {obj_wrefs}")
         for wref in obj_wrefs:
             obj = wref()
             if obj is None:
-                pdfium_i._warn_close(f"Weakref {wref} was not cleaned up from ObjectTracker.")
+                pdfium_i._warn_close(f"Weakref {wref} was not cleaned up from ObjectTracker?")
             else:
-                # outsource actual closing to avoid "RuntimeError: Set changed size during iteration" (because closing removes the object from the set of weakrefs)
-                need_close.append(obj)
-    
-    if need_close:
-        pdfium_i._warn_close(f"The following objects are still open and will now be closed: {need_close}")
-        for obj in need_close:
-            obj.close()
+                pdfium_i._warn_close(f"The following object was still open and will be closed now: {obj}")
+                obj.close()
 
 
 def destroy_lib():  # pragma: no cover
