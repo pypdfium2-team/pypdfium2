@@ -164,7 +164,7 @@ class AutoCloseable (AutoCastable):
             return False
         
         # Only need to check this in manual closing, with finalizers the API contract promises the order of invocation.
-        # Important: MUST iterate over a copy, since GC might interfere and finalize one of the objects while the loop runs.
+        # Important: MUST iterate over a copy, since GC might interfere and finalize one of the objects while the loop runs, implicitly modifying the set which is illegal during iteration.
         for k_wref in self._kids.copy():
             k = k_wref()
             if k and k.raw:
