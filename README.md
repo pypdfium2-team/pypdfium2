@@ -969,7 +969,7 @@ This results in pypdfium2 being part of a large dependency tree and having rathe
 
 This causes us to prioritize stability and take some caution with new releases. This translates to a slowed-down release schedule and more interest in consolidation & code quality improvement than new features which add maintenance burden.
 
-We also highly recommend the use of lockfiles and dependency cooldowns, since the main thing to be concerned about is an actual supply chain attack (in the sense of a project being compromised), whereas edge-case memory inaccuracies are little to no concern even if they might get assigned CVEs with absurdly high scores. Since there is no way to ever be sure to be free of these it's just something you have to calculate with. Make sure you don't work with untrusted, potentially malicious input, and/or use a sandboxed environment.
+We also highly recommend the use of lockfiles and dependency cooldowns, since the main thing to be concerned about is an actual supply chain attack (in the sense of a project being compromised). Edge-case memory inaccuracies might get assigned CVEs with absurdly high scores, but a memory bug isn't an exploit of its own – it still takes malicious input to that. Since there is no way to ever be sure to be free of memory bugs in a large C(++) codebase, this is just something you have to calculate with. Conversely, malicious input might well be able to abuse a yet-unknown issue ("zero-day exploit"), so touching a malicious source is always an extremely high risk of its own accord. Therefore, make sure you don't work with untrusted, potentially malicious data, and/or use a sandboxed environment.
 
 
 ## Thanks to[^thanks_to]
