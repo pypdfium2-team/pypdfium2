@@ -545,6 +545,7 @@ class _host_platform:
             for prefix, resolved_mach in prefix_map:
                 if mach.startswith(prefix):
                     mach = resolved_mach
+                    break
             if self.is_32bit:
                 mach = {"x86_64": "i686", "aarch64": "armv8l", "mips64le": "mipsle"}.get(mach, mach)
             if mach == "x86_64":
