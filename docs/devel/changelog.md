@@ -7,14 +7,12 @@
 
 ## 5.15.2 (2026-11-09)
 
-- No pdfium-binaries update, still at `8138`. Additional builds may use various other versions of pdfium.
 - Fix another unfortunate blunder in the previous release that broke closing on interpreter shutdown.
 - Add more sophisticated protection by preventing object trackers from being modified while they are traversed.
 
 
 ## 5.15.1 (2026-11-07)
 
-- No pdfium-binaries update, still at `8138`. Additional builds may use various other versions of pdfium.
 - Update build scripts from PDFium `8146` to `8149`. This release is again made with the `prefer-sbuild` strategy.
 - Fixed a blunder in the autoclose machinery. We mustn't iterate over object trackers directly as they can change any time, because GC might run a finalizer removing an item from the tracker. We hope that first making a shallow copy should prevent this condition. The issue had been introduced in v5.8.0 but went unreported and unnoticed by the author until this day. Many thanks to `@vuongphamxd05` for this outstanding catch.
 
