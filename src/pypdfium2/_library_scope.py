@@ -4,14 +4,14 @@
 import atexit
 import logging
 import pypdfium2.raw as pdfium_c
-import pypdfium2.internal.bases as mach
+from pypdfium2.internal import bases
 from pypdfium2_cfg import DEBUG_AUTOCLOSE
 
 logger = logging.getLogger("pypdfium2")
 
 
 def init_lib():
-    assert not mach.LIBRARY_AVAILABLE
+    assert not bases.LIBRARY_AVAILABLE
     if DEBUG_AUTOCLOSE:  # pragma: no cover
         logger.debug("Initialize PDFium")
     
@@ -26,32 +26,32 @@ def init_lib():
         # m_RendererType = pdfium_c.FPDF_RENDERERTYPE_AGG,  # v4
     )
     pdfium_c.FPDF_InitLibraryWithConfig(config)
-    mach.LIBRARY_AVAILABLE = True
+    bases.LIBRARY_AVAILABLE = True
 
 
 def _close_objects():
-    for cls, obj_wrefs in mach.ObjectTracker.items():
+    for cls, obj_wrefs in bases.ObjectTracker.items():
         # pdfium_i._debug_close(f"{cls and cls.__name__}: {obj_wrefs}")
         # XXX(transitional): copy() as an extra precaution - should be unnecessary
         for wref in obj_wrefs.copy():
             obj = wref()
             if obj is None:
-                mach._warn_close(f"Weakref {wref} was not cleaned up from ObjectTracker?")
+                bases._warn_close(f"Weakref {wref} was not cleaned up from ObjectTracker?")
             else:
-                mach._warn_close(f"The following object was still open and will be closed now: {obj}")
+                bases._warn_close(f"The following object was still open and will be closed now: {obj}")
                 obj.close()
 
 
 def destroy_lib():  # pragma: no cover
-    assert mach.LIBRARY_AVAILABLE
-    mach.REMOVE_FROM_TRACKER = False
+    assert bases.LIBRARY_AVAILABLE
+    bases.REMOVE_FROM_TRACKER = False
     try:
         _close_objects()
     finally:
-        mach.REMOVE_FROM_TRACKER = True
-        mach._debug_close("Destroy PDFium")
+        bases.REMOVE_FROM_TRACKER = True
+        bases._debug_close("Destroy PDFium")
         pdfium_c.FPDF_DestroyLibrary()
-        mach.LIBRARY_AVAILABLE = False
+        bases.LIBRARY_AVAILABLE = False
 
 
 # Load pdfium
