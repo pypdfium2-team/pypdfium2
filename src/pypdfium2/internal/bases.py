@@ -11,13 +11,13 @@ import weakref
 import logging
 from collections import defaultdict
 from pypdfium2_cfg import DEBUG_AUTOCLOSE  # bw compat
-from pypdfium2_cfg.stl import cached_property, Stack
+from pypdfium2_cfg.stl import cached_property
 
 logger = logging.getLogger(__name__)
 
 LIBRARY_AVAILABLE = False
 ObjectTracker = defaultdict(set)
-PARENT_BEING_CLOSED = Stack()
+PARENTS_BEING_CLOSED = []
 REMOVE_FROM_TRACKER = True
 
 
@@ -78,7 +78,7 @@ def _close_template(info, owner):
     
     assert info.state != _STATE.INVALID
     parent = owner.parent
-    if info.tracked and parent is not None and PARENT_BEING_CLOSED.value is not parent:
+    if info.tracked and (parent is not None) and (parent not in PARENTS_BEING_CLOSED):
         assert not parent._tree_closed()
         #assert owner.wref in parent._kids, f"{owner.repr} {owner.wref}, {parent} {parent._kids}"
         parent._kids.remove(owner.wref)
@@ -168,7 +168,7 @@ class AutoCloseable (AutoCastable):
         # Only need to visit kids in manual closing, with finalizers the API contract promises the order of invocation.
         # The tricky bit about self._kids is that finalizers implicitly clean up their references, so we need to be really cautious to avoid size changes during iteration.
         if self._kids_loaded:
-            PARENT_BEING_CLOSED.push(self)
+            PARENTS_BEING_CLOSED.append(self)
             try:
                 # retain copy() as an extra precaution for now
                 for k_wref in self._kids.copy():
@@ -176,7 +176,7 @@ class AutoCloseable (AutoCastable):
                     if k and k.raw:
                         k.close(_by_parent=True)
             finally:
-                PARENT_BEING_CLOSED.pop()
+                PARENTS_BEING_CLOSED.pop()
             self._kids.clear()
         
         self._fin_info.state = _STATE.BYPARENT if _by_parent else _STATE.EXPLICIT

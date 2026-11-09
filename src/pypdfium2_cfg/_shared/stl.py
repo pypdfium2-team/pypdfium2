@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
-__all__ = ("cached_property", "keydefaultdict", "Stack", "BooleanOptionalAction", "ArgparseCompatParser")
+__all__ = ("cached_property", "keydefaultdict", "BooleanOptionalAction", "ArgparseCompatParser")
 
 import sys
 from typing import TypeVar, Generic, Callable
@@ -67,18 +67,6 @@ class keydefaultdict (dict):
     def __missing__(self, key):
         self[key] = value = self.default_factory(key)
         return value
-
-
-class Stack:
-    
-    def __init__(self):
-        self._stack = []
-        self.push = self._stack.append
-        self.pop = self._stack.pop
-    
-    @property
-    def value(self):
-        return self._stack[-1] if self._stack else None
 
 
 import argparse
