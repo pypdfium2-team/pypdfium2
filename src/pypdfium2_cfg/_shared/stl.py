@@ -73,19 +73,12 @@ class Stack:
     
     def __init__(self):
         self._stack = []
+        self.push = self._stack.append
+        self.pop = self._stack.pop
     
     @property
     def value(self):
-        if self._stack:
-            return self._stack[-1]
-        else:
-            return None
-    
-    def push(self, item):
-        self._stack.append(item)
-    
-    def pop(self):
-        return self._stack.pop()
+        return self._stack[-1] if self._stack else None
 
 
 import argparse
