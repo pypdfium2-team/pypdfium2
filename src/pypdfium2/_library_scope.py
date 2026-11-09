@@ -30,9 +30,9 @@ def init_lib():
 
 
 def _close_objects():
-    for cls, obj_wrefs in pdfium_i.ObjectTracker.copy().items():
+    for cls, obj_wrefs in pdfium_i.ObjectTracker.items():
         # pdfium_i._debug_close(f"{cls and cls.__name__}: {obj_wrefs}")
-        for wref in obj_wrefs:
+        for wref in obj_wrefs.copy():
             obj = wref()
             if obj is None:
                 pdfium_i._warn_close(f"Weakref {wref} was not cleaned up from ObjectTracker?")
