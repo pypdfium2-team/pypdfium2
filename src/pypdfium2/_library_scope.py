@@ -32,7 +32,7 @@ def init_lib():
 def _close_objects():
     for cls, obj_wrefs in bases.ObjectTracker.items():
         # pdfium_i._debug_close(f"{cls and cls.__name__}: {obj_wrefs}")
-        # XXX(transitional): copy() as an extra precaution - should be unnecessary
+        # retain copy() as an extra precaution for now
         for wref in obj_wrefs.copy():
             obj = wref()
             if obj is None:
@@ -40,6 +40,7 @@ def _close_objects():
             else:
                 bases._warn_close(f"The following object was still open and will be closed now: {obj}")
                 obj.close()
+        obj_wrefs.clear()
 
 
 def destroy_lib():  # pragma: no cover

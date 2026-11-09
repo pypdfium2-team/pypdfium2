@@ -166,10 +166,11 @@ class AutoCloseable (AutoCastable):
             return False
         
         # Only need to visit kids in manual closing, with finalizers the API contract promises the order of invocation.
+        # The tricky bit about self._kids is that finalizers implicitly clean up their references, so we need to be really cautious to avoid size changes during iteration.
         if self._kids_loaded:
             PARENT_BEING_CLOSED.push(self)
             try:
-                # XXX(transitional): copy() as an extra precaution - should be unnecessary
+                # retain copy() as an extra precaution for now
                 for k_wref in self._kids.copy():
                     k = k_wref()
                     if k and k.raw:
