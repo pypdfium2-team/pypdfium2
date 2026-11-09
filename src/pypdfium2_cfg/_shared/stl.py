@@ -1,7 +1,10 @@
 # SPDX-FileCopyrightText: 2026 geisserml <geisserml@gmail.com>
 # SPDX-License-Identifier: Apache-2.0 OR BSD-3-Clause
 
+__all__ = ("cached_property", "keydefaultdict", "Stack", "BooleanOptionalAction", "ArgparseCompatParser")
+
 import sys
+from typing import TypeVar, Generic, Callable
 
 
 # See also
@@ -9,7 +12,10 @@ import sys
 # https://gist.github.com/mara004/076e3110aba8e8a3f8a6f2c84af350ee
 # https://stackoverflow.com/a/78825819/15547292
 
-class cached_property:
+_TInstance = TypeVar("_TInstance")
+_TResult = TypeVar("_TResult")
+
+class cached_property (Generic[_TInstance, _TResult]):
     """
     Custom cached property implementation.
     
@@ -30,7 +36,7 @@ class cached_property:
         In general, you almost never want :func:`functools.lru_cache` except on standalone functions. It is inappropriate on methods. Unfortunately, there is no instance-level LRU cache in the standard library, but you could consider something like ``methodtools.lru_cache()``.
     """
     
-    def __init__(self, func):
+    def __init__(self, func: Callable[[_TInstance], _TResult]):
         self.func = func
         self.assigned_name = None
         self.__doc__ = func.__doc__
@@ -41,7 +47,7 @@ class cached_property:
         else:
             assert name == self.assigned_name, f"A cached property is tied to one attribute. You cannot assign to both {name!r} and {self.assigned_name!r}."
     
-    def __get__(self, obj, cls=None):
+    def __get__(self, obj, cls=None) -> _TResult:
         if obj is None:
             return self
         value = self.func(obj)
@@ -61,6 +67,25 @@ class keydefaultdict (dict):
     def __missing__(self, key):
         self[key] = value = self.default_factory(key)
         return value
+
+
+class Stack:
+    
+    def __init__(self):
+        self._stack = []
+    
+    @property
+    def value(self):
+        if self._stack:
+            return self._stack[-1]
+        else:
+            return None
+    
+    def push(self, item):
+        self._stack.append(item)
+    
+    def pop(self):
+        return self._stack.pop()
 
 
 import argparse

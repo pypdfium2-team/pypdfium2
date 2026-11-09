@@ -10,14 +10,15 @@ import uuid
 import weakref
 import logging
 from collections import defaultdict
-import pypdfium2_cfg
 from pypdfium2_cfg import DEBUG_AUTOCLOSE  # bw compat
-from pypdfium2_cfg.stl import cached_property
+from pypdfium2_cfg.stl import cached_property, Stack
 
 logger = logging.getLogger(__name__)
-LIBRARY_AVAILABLE = pypdfium2_cfg._Mutable(False)  # set to true on library init
 
+LIBRARY_AVAILABLE = False
 ObjectTracker = defaultdict(set)
+PARENT_BEING_CLOSED = Stack()
+REMOVE_FROM_TRACKER = True
 
 
 def _debug_close(msg, prio=logging.DEBUG):  # pragma: no cover
@@ -76,16 +77,15 @@ def _close_template(info, owner):
         return
     
     assert info.state != _STATE.INVALID
-    
     parent = owner.parent
-    if parent is not None:
+    if info.tracked and parent is not None and PARENT_BEING_CLOSED.value is not parent:
         assert not parent._tree_closed()
-        if info.tracked:
-            #assert owner.wref in parent._kids, f"{owner.repr} {owner.wref}, {parent} {parent._kids}"
-            parent._kids.remove(owner.wref)
+        #assert owner.wref in parent._kids, f"{owner.repr} {owner.wref}, {parent} {parent._kids}"
+        parent._kids.remove(owner.wref)
     
     info.close_func(owner.raw, *info.args, **info.kwargs)
-    ObjectTracker[owner.type].remove(owner.wref)
+    if REMOVE_FROM_TRACKER:
+        ObjectTracker[owner.type].remove(owner.wref)
 
 
 class AutoCastable:
@@ -112,12 +112,14 @@ class AutoCloseable (AutoCastable):
         self._fin_info = _FinalizerInfo(close_func, args, kwargs, tracked)
         self._fin_obj = obj
         self._finalizer = None
+        self._kids_loaded = False
         
         if needs_free:
             self._attach_finalizer()
     
     @cached_property
     def _kids(self):
+        self._kids_loaded = True
         return set()
     
     @cached_property
@@ -163,15 +165,17 @@ class AutoCloseable (AutoCastable):
             self.raw = None
             return False
         
-        # Only need to check this in manual closing, with finalizers the API contract promises the order of invocation.
-        # Important: MUST iterate over a copy, since GC might interfere and finalize one of the objects while the loop runs, implicitly modifying the set which is illegal during iteration.
-        for k_wref in self._kids.copy():
-            k = k_wref()
-            if k and k.raw:
-                k.close(_by_parent=True)
-        
-        if self._kids:
-            logger.warning(f"Some kids weakrefs have not been cleaned up: {self._kids}")
+        # Only need to visit kids in manual closing, with finalizers the API contract promises the order of invocation.
+        if self._kids_loaded:
+            PARENT_BEING_CLOSED.push(self)
+            try:
+                # XXX(transitional): copy() as an extra precaution - should be unnecessary
+                for k_wref in self._kids.copy():
+                    k = k_wref()
+                    if k and k.raw:
+                        k.close(_by_parent=True)
+            finally:
+                PARENT_BEING_CLOSED.pop()
             self._kids.clear()
         
         self._fin_info.state = _STATE.BYPARENT if _by_parent else _STATE.EXPLICIT
