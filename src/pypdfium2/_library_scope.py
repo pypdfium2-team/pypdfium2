@@ -29,25 +29,20 @@ def init_lib():
     bases.LIBRARY_AVAILABLE = True
 
 
-def _close_objects():
-    for cls, obj_wrefs in bases.ObjectTracker.items():
-        # pdfium_i._debug_close(f"{cls and cls.__name__}: {obj_wrefs}")
-        # retain copy() as an extra precaution for now
-        for wref in obj_wrefs.copy():
-            obj = wref()
-            if obj is None:
-                bases._warn_close(f"Weakref {wref} was not cleaned up from ObjectTracker?")
-            else:
-                bases._warn_close(f"The following object was still open and will be closed now: {obj}")
-                obj.close()
-        obj_wrefs.clear()
-
-
 def destroy_lib():  # pragma: no cover
     assert bases.LIBRARY_AVAILABLE
     bases.REMOVE_FROM_TRACKER = False
     try:
-        _close_objects()
+        for obj_wrefs in bases.ObjectTracker.values():
+            # pdfium_i._debug_close(f"{cls and cls.__name__}: {obj_wrefs}")
+            for wref in obj_wrefs:
+                obj = wref()
+                if obj is None:
+                    bases._warn_close(f"Weakref {wref} was not cleaned up from ObjectTracker?")
+                else:
+                    bases._warn_close(f"The following object was still open and will be closed now: {obj}")
+                    obj.close()
+            obj_wrefs.clear()
     finally:
         bases.REMOVE_FROM_TRACKER = True
         bases._debug_close("Destroy PDFium")

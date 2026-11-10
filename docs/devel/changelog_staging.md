@@ -4,3 +4,4 @@
 <!-- List character: dash (-) -->
 
 # Changelog for next release
+- Remove some copying from autoclose machinery that should be unnecessary but had been retained as an extra precaution in the previous release.

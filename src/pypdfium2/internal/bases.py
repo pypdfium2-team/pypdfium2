@@ -77,11 +77,12 @@ def _close_template(info, owner):
         return
     
     assert info.state != _STATE.INVALID
-    parent = owner.parent
-    if info.tracked and (parent is not None) and (parent not in PARENTS_BEING_CLOSED):
+    if info.tracked:  # implies owner.parent is not None
+        parent = owner.parent
         assert not parent._tree_closed()
-        #assert owner.wref in parent._kids, f"{owner.repr} {owner.wref}, {parent} {parent._kids}"
-        parent._kids.remove(owner.wref)
+        # assert owner.wref in parent._kids, f"{owner.repr} {owner.wref}, {parent} {parent._kids}"
+        if parent not in PARENTS_BEING_CLOSED:
+            parent._kids.remove(owner.wref)
     
     info.close_func(owner.raw, *info.args, **info.kwargs)
     if REMOVE_FROM_TRACKER:
@@ -170,11 +171,9 @@ class AutoCloseable (AutoCastable):
         if self._kids_loaded:
             PARENTS_BEING_CLOSED.append(self)
             try:
-                # retain copy() as an extra precaution for now
-                for k_wref in self._kids.copy():
+                for k_wref in self._kids:
                     k = k_wref()
-                    if k and k.raw:
-                        k.close(_by_parent=True)
+                    if k: k.close(_by_parent=True)
             finally:
                 PARENTS_BEING_CLOSED.pop()
             self._kids.clear()
