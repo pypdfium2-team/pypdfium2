@@ -26,7 +26,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
         **However, closing a foreign bitmap also frees (invalidates) the buffer, which is a potentially unsafe operation, in that it's down to the caller to ensure the memory represented by** :attr:`.buffer` **is not used after free**, whether directly or indirectly through wrapper objects (such as a numpy array or PIL image derived from the bitmap). In this case, the finalizer is attached to the buffer, so by default the underlying memory remains valid as long as the buffer object is held.
     
     .. versionchanged:: 3.14
-        ``FPDFBitmap_Destroy()`` is now unconditionally called on closing/finalization, including on native bitmaps, to release the ``FPDF_BITMAP`` shell itself. In prior versions, native bitmaps were not finalized and calling :meth:`.close` on a native bitmap was a no-op. This may have caused a small leak.
+        ``FPDFBitmap_Destroy()`` is now unconditionally called on closing/finalization, including on native bitmaps, to release the ``FPDF_BITMAP`` shell itself. In prior versions, native bitmaps were not finalized and calling :meth:`.close` on a native bitmap was a no-op.
     
     .. _PIL Modes: https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes
     
@@ -238,7 +238,7 @@ class PdfBitmap (pdfium_i.AutoCloseable):
     
     # IMPORTANT: When a wrapper is constructed around a foreign bitmap without copying (i.e. as a view of the same memory), we rely on the assumption that the wrapper holds a reference to the input buffer object itself while the represented memory is used.
     # This appears to be the case with Pillow and NumPy, as of 2026. When adding a new adapter, it needs to be carefully tested to fulfill this requirement.
-    # Why not attach a buffer keep-alive finalizer to wrapper objects?, you might ask. That's a good question, and we could consider doing that, but there are issues: Suppose the adapter made a copy after all, we'd unnecessarily delay releasing memory. Copying is kind of an implementation detail of the adapter's (consider Pillow, where it is format dependent; consider things like copy-on-write). Or suppose the buffer is transferred to another object, we still face the original problem. So this isn't necessarily helpful, is it?
+    # Why not attach a buffer keep-alive finalizer to wrapper objects?, you might ask. Well, there are problems: Suppose the adapter made a copy after all, we'd unnecessarily delay releasing memory. Copying is kind of an implementation detail of the adapter's (consider Pillow, where it is format dependent). Or suppose the buffer is transferred to another object, we still face the original problem. Tying the finalizer to the buffer object without further ado is about best we can do.
     
     def to_numpy(self):
         """
