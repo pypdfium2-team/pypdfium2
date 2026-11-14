@@ -30,10 +30,10 @@ class PdfDocument (pdfium_i.AutoCloseable):
         input (str | pathlib.Path | bytes | ctypes.Array | typing.BinaryIO | FPDF_DOCUMENT):
             The input PDF given as file path, bytes, ctypes array, readable byte stream, or raw PDFium document handle.
             A readable byte stream is considered an object that implements ``seek() tell() read() readinto()`` in line with the usual :mod:`io` protocols.
-            If input is file-based (as opposed to in-memory), the backing file must (obviously) remain intact and not be modified while the document handle is used. This goes for both file paths and streams.
+            If input is file-based (as opposed to in-memory), the backing file must remain intact and not be modified while the document handle is used. This goes for both file paths and streams.
         password (str | None):
             A password to unlock the PDF, if encrypted. Otherwise, None or an empty string may be passed.
-            If a password is given but the PDF is not encrypted, it will be ignored (as of PDFium 5418).
+            If a password is given but the PDF is not encrypted, it will be ignored (as an implementation detail of PDFium).
         autoclose (bool):
             Whether byte stream input should be automatically closed on finalization.
     
